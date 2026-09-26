@@ -1,0 +1,157 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install elan
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      # Mathlib and its dependencies come from `lake exe cache get`, so only
+      # cache this project's build and the two dependencies Mathlib's cache
+      # does not cover. Caching all of `.lake` (~2.6 GB) exhausted runner disk.
+      - name: Restore Lake artifacts
+        uses: actions/cache/restore@v6
+        with:
+          path: |
+            .lake/build
+            .lake/packages/viscosity_solns
+            .lake/packages/AleksandrovDifferentiability
+          key: lake-build-${{ runner.os }}-${{ hashFiles('lake-manifest.json', 'lean-toolchain') }}-${{ hashFiles('ParabolicBasic.lean', 'ParabolicBasic/**/*.lean') }}
+          restore-keys: |
+            lake-build-${{ runner.os }}-${{ hashFiles('lake-manifest.json', 'lean-toolchain') }}-
+      - name: Fetch mathlib cache
+        run: lake exe cache get
+      - name: Build complete library
+        run: lake build
+      - name: Check trusted library source
+        shell: python3 {0}
+        run: |
+          from pathlib import Path
+          import re
+          import sys
+
+          forbidden = {"sorry", "admit", "axiom", "native_decide"}
+
+          def code_only(source: str) -> str:
+              """Mask comments and string literals while preserving positions."""
+              masked = list(source)
+              i = 0
+              block_depth = 0
+              state = "code"
+              while i < len(source):
+                  if state == "code":
+                      if source.startswith("--", i):
+                          masked[i:i + 2] = "  "
+                          i += 2
+                          state = "line_comment"
+                      elif source.startswith("/-", i):
+                          masked[i:i + 2] = "  "
+                          i += 2
+                          block_depth = 1
+                          state = "block_comment"
+                      elif source.startswith('\"\"\"', i):
+                          masked[i:i + 3] = "   "
+                          i += 3
+                          state = "triple_string"
+                      elif source[i] == '\"':
+                          masked[i] = " "
+                          i += 1
+                          state = "string"
+                      else:
+                          i += 1
+                  elif state == "line_comment":
+                      if source[i] == "\n":
+                          state = "code"
+                      else:
+                          masked[i] = " "
+                      i += 1
+                  elif state == "block_comment":
+                      if source.startswith("/-", i):
+                          masked[i:i + 2] = "  "
+                          block_depth += 1
+                          i += 2
+                      elif source.startswith("-/", i):
+                          masked[i:i + 2] = "  "
+                          block_depth -= 1
+                          i += 2
+                          if block_depth == 0:
+                              state = "code"
+                      else:
+                          if source[i] != "\n":
+                              masked[i] = " "
+                          i += 1
+                  elif state == "string":
+                      if source[i] == "\\":
+                          masked[i] = " "
+                          if i + 1 < len(source):
+                              if source[i + 1] != "\n":
+                                  masked[i + 1] = " "
+                              i += 2
+                          else:
+                              i += 1
+                      elif source[i] == '\"':
+                          masked[i] = " "
+                          i += 1
+                          state = "code"
+                      else:
+                          if source[i] != "\n":
+                              masked[i] = " "
+                          i += 1
+                  else:  # triple_string
+                      if source.startswith('\"\"\"', i):
+                          masked[i:i + 3] = "   "
+                          i += 3
+                          state = "code"
+                      else:
+                          if source[i] != "\n":
+                              masked[i] = " "
+                          i += 1
+              return "".join(masked)
+
+          failures = []
+          paths = [Path("ParabolicBasic.lean"), *Path("ParabolicBasic").rglob("*.lean")]
+          for path in paths:
+              source = path.read_text(encoding="utf-8")
+              for match in re.finditer(r"[A-Za-z_][A-Za-z0-9_']*", code_only(source)):
+                  if match.group() in forbidden:
+                      line = source.count("\n", 0, match.start()) + 1
+                      failures.append(f"{path}:{line}: forbidden token {match.group()}")
+          if failures:
+              print("\n".join(failures), file=sys.stderr)
+              raise SystemExit(1)
+      - name: Enforce library source-file size limit
+        run: |
+          find ParabolicBasic -type f -name '*.lean' -exec wc -l {} + | \
+            awk '$2 != "total" && $1 >= 1000 { print; bad = 1 } END { exit bad }'
+          test "$(wc -l < ParabolicBasic.lean)" -lt 1000
+      - name: Validate manifest, library Lean names, and exact target axioms
+        run: ruby scripts/check-formalization-manifest.rb
+      - name: Check challenge solutions for sorry, axioms, and native_decide
+        run: |
+          ! grep -nE '\bsorry\b|^axiom |\badmit\b|native_decide' challenges/*/Solution.lean
+      # Elaboration shows each Challenge and Solution compiles against this
+      # commit's library.  It is not a statement comparison; that is the
+      # release Comparator workflow's job.
+      - name: Elaborate challenge workspaces (Challenge and Solution)
+        run: scripts/build-challenges.sh --trusted-all
+      - name: Save Lake artifacts
+        uses: actions/cache/save@v6
+        if: always()
+        with:
+          path: |
+            .lake/build
+            .lake/packages/viscosity_solns
+            .lake/packages/AleksandrovDifferentiability
+          key: lake-build-${{ runner.os }}-${{ hashFiles('lake-manifest.json', 'lean-toolchain') }}-${{ hashFiles('ParabolicBasic.lean', 'ParabolicBasic/**/*.lean') }}

@@ -1,0 +1,49 @@
+import Mathlib
+
+/-!
+# Challenge: the Dirichlet problem for the heat equation on a ball cylinder
+
+Trusted statement surface for the caloric Dirichlet problem on the cylinder
+`B_ρ(x₀) × (a, b]` in `ℝᵈ × ℝ` [Lieberman, *Second Order Parabolic Differential Equations*,
+Ch. III]. For continuous data `g` on the parabolic boundary
+`(B̄_ρ(x₀) × {a}) ∪ (∂B_ρ(x₀) × [a, b])` there is `h`, continuous on the closed cylinder
+`B̄_ρ(x₀) × [a, b]`, `C^∞` in the open cylinder `B_ρ(x₀) × (a, b)` and solving the heat equation
+`∂ₜh = Δₓh` there classically, with `h = g` on the parabolic boundary.
+
+The statement uses Mathlib vocabulary only: `EuclideanSpace ℝ (Fin d)`, `Metric.ball`,
+`Metric.closedBall`, `Metric.sphere`, `ContinuousOn`, `ContDiffOn`, `deriv` and Mathlib's
+Laplacian `Δ` (`InnerProductSpace.laplacian`). No project definition is restated; this file
+imports `Mathlib` only.
+-/
+
+open Set Metric
+open scoped ContDiff Laplacian
+
+namespace ParabolicBasic
+
+/-- **Caloric Dirichlet problem on a ball cylinder.** Let `x₀ ∈ ℝᵈ`, `ρ > 0`, `a < b`, and let
+`g` be continuous on the parabolic boundary `(B̄_ρ(x₀) × {a}) ∪ (∂B_ρ(x₀) × [a, b])`. Then there is
+`h : ℝᵈ × ℝ → ℝ` such that
+
+* `h` is continuous on `B̄_ρ(x₀) × [a, b]`;
+* `h` is `C^∞` on `B_ρ(x₀) × (a, b)` (`ContDiffOn ℝ ∞`; in this Mathlib `ω` would mean analytic,
+  which is not claimed);
+* `∂ₜh(x, t) = Δₓh(x, t)` for `x ∈ B_ρ(x₀)`, `t ∈ (a, b)`, where `∂ₜ` is the derivative of the time
+  slice `s ↦ h (x, s)` and `Δₓ` is the Laplacian of the space slice `y ↦ h (y, t)`;
+* `h = g` on the initial face `B̄_ρ(x₀) × {a}` and on the lateral face `∂B_ρ(x₀) × [a, b]`.
+
+All `d` are allowed. For `d = 0` the space `ℝ⁰` is a point, the sphere is empty, and the statement
+reduces to the initial-value problem for an ODE `h' = 0`. -/
+theorem challenge_caloric_dirichlet_ball {d : ℕ} (x₀ : EuclideanSpace ℝ (Fin d)) {ρ : ℝ}
+    (hρ : 0 < ρ) {a b : ℝ} (hab : a < b) {g : EuclideanSpace ℝ (Fin d) × ℝ → ℝ}
+    (hg : ContinuousOn g (closedBall x₀ ρ ×ˢ {a} ∪ sphere x₀ ρ ×ˢ Icc a b)) :
+    ∃ h : EuclideanSpace ℝ (Fin d) × ℝ → ℝ,
+      ContinuousOn h (closedBall x₀ ρ ×ˢ Icc a b) ∧
+      ContDiffOn ℝ ∞ h (ball x₀ ρ ×ˢ Ioo a b) ∧
+      (∀ x ∈ ball x₀ ρ, ∀ t ∈ Ioo a b,
+        deriv (fun s ↦ h (x, s)) t = Δ (fun y ↦ h (y, t)) x) ∧
+      (∀ x ∈ closedBall x₀ ρ, h (x, a) = g (x, a)) ∧
+      (∀ x ∈ sphere x₀ ρ, ∀ t ∈ Icc a b, h (x, t) = g (x, t)) := by
+  sorry
+
+end ParabolicBasic

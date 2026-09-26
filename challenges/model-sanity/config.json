@@ -1,0 +1,12 @@
+{
+  "challenge_module": "Challenge",
+  "solution_module": "Solution",
+  "theorem_names": [
+    "ParabolicBasic.challenge_time_not_viscSub",
+    "ParabolicBasic.challenge_time_viscSuper",
+    "ParabolicBasic.challenge_caloric_quadratic_solOn",
+    "ParabolicBasic.challenge_parBdry_ball_nonempty"
+  ],
+  "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
+  "enable_nanoda": false
+}

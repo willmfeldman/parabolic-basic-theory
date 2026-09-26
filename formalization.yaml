@@ -1,0 +1,158 @@
+project: ParabolicBasic
+description: >
+  Lean 4 formalization of the basic theory of the heat operator and of
+  semilinear heat equations on R^d x R: comparison for viscosity solutions,
+  parabolic Perron existence, regularity of viscosity caloric functions,
+  interior Schauder estimates, and the semilinear Cauchy-Dirichlet problem.
+lean_toolchain: leanprover/lean4:v4.30.0
+mathlib: v4.30.0
+dependencies:
+  - name: viscosity_solns
+    url: https://github.com/willmfeldman/viscosity-solution-theory
+    rev: v0.2.0
+  - name: AleksandrovDifferentiability
+    url: https://github.com/willmfeldman/aleksandrov-differentiability
+    rev: v0.2.0  # 730e7e9256c7e8018abad3bbc50a0598c656b61c
+permitted_axioms: [propext, Quot.sound, Classical.choice]
+automation:
+  methods:
+    - method: agent-assisted formalization
+      models: []
+      framework: "Agent-assisted Lean development with human direction and review"
+      review_status: human-supervised
+      notes: >-
+        AI coding agents contributed to the formalization. Exact model history and
+        per-declaration provenance are not recorded in this manifest.
+targets:
+  - id: caloric-dirichlet-ball
+    kind: headline-theorem
+    expected_axioms: [propext, Quot.sound, Classical.choice]
+    title: Dirichlet problem for the heat equation on a ball cylinder
+    source: "Lieberman, Second Order Parabolic Differential Equations, Ch. III"
+    module: ParabolicBasic.MainTheorems
+    declaration: ParabolicBasic.caloric_dirichlet_ball
+    informal: >
+      For x0 in R^d, rho > 0, a < b and g continuous on the parabolic boundary
+      of B_rho(x0) x (a, b], there is h continuous on the closed cylinder,
+      C^infinity and caloric in the open cylinder, with h = g on the parabolic
+      boundary.
+    challenge: challenges/caloric-dirichlet-ball
+    challenge_theorems: [ParabolicBasic.challenge_caloric_dirichlet_ball]
+  - id: semilinear-comparison
+    kind: headline-theorem
+    expected_axioms: [propext, Quot.sound, Classical.choice]
+    title: Comparison for the semilinear heat equation
+    source: "Crandall-Ishii-Lions, User's Guide, Theorem 8.2"
+    module: ParabolicBasic.MainTheorems
+    declaration: ParabolicBasic.semilinear_comparison
+    related_declarations:
+      - ParabolicBasic.semilinear_unique
+      - ParabolicBasic.comparison_usc_lsc
+    informal: >
+      On a bounded open V with f Hoelder in x and Lipschitz in z, a continuous
+      viscosity subsolution u and supersolution v of u_t = Lap u - f(x, u) in
+      V x (a, b] with u <= v on the parabolic boundary satisfy u <= v on the
+      closed cylinder. Uniqueness for the Cauchy-Dirichlet problem follows.
+    challenge: challenges/semilinear-comparison
+    challenge_theorems:
+      - ParabolicBasic.challenge_semilinear_comparison
+      - ParabolicBasic.challenge_semilinear_unique
+  - id: classical-viscosity
+    kind: headline-theorem
+    expected_axioms: [propext, Quot.sound, Classical.choice]
+    title: Classical solutions are viscosity solutions
+    source: "Crandall-Ishii-Lions, User's Guide, Section 8"
+    module: ParabolicBasic.MainTheorems
+    declaration: ParabolicBasic.isSemilinearViscSubOn_of_solOn
+    related_declarations:
+      - ParabolicBasic.isSemilinearViscSuperOn_of_solOn
+    informal: >
+      A classical C^{2,1} solution of u_t = Lap u - f(x, u) in U x I, with U
+      open and I containing a left neighbourhood of each of its points, is a
+      viscosity sub- and supersolution (past-touching test functions).
+    challenge: challenges/classical-viscosity
+    challenge_theorems:
+      - ParabolicBasic.challenge_classical_viscSub
+      - ParabolicBasic.challenge_classical_viscSuper
+  - id: semilinear-existence
+    kind: headline-theorem
+    expected_axioms: [propext, Quot.sound, Classical.choice]
+    title: Existence for the semilinear Cauchy-Dirichlet problem
+    source: "Lieberman, Ch. IX; Ladyzhenskaya-Solonnikov-Ural'tseva, Ch. V"
+    module: ParabolicBasic.MainTheorems
+    declaration: ParabolicBasic.semilinear_exists
+    informal: >
+      On a bounded open U with C^2 boundary, with f Hoelder in x, Lipschitz in
+      z and bounded, and g Lipschitz, the problem u_t = Lap u - f(x, u) in
+      U x (0, infinity), u = g on the parabolic boundary, has a solution in
+      C(closure U x [0, infinity)) and C^{2,1}(U x (0, infinity)).
+    challenge: challenges/semilinear-existence
+    challenge_theorems: [ParabolicBasic.challenge_semilinear_exists]
+  - id: semilinear-regularity
+    kind: headline-theorem
+    expected_axioms: [propext, Quot.sound, Classical.choice]
+    title: Interior smoothness and gradient continuity up to t = 0
+    source: "Schauder bootstrap; barrier argument"
+    module: ParabolicBasic.MainTheorems
+    declaration: ParabolicBasic.semilinear_contDiffOn_of_contDiff
+    related_declarations:
+      - ParabolicBasic.semilinear_continuousOn_gradₓ_of_contDiff
+    informal: >
+      A classical solution is C^infinity in U x I when f is C^infinity. For a
+      solution of the Cauchy-Dirichlet problem with continuous f and C^2 data,
+      the spatial gradient is continuous on U x [0, infinity).
+    challenge: challenges/semilinear-regularity
+    challenge_theorems:
+      - ParabolicBasic.challenge_semilinear_smooth
+      - ParabolicBasic.challenge_semilinear_gradient_continuous
+  - id: caloric-smooth
+    kind: headline-theorem
+    expected_axioms: [propext, Quot.sound, Classical.choice]
+    title: Viscosity caloric functions are smooth
+    source: "Mollification, Bernstein estimates, and stability under uniform limits"
+    module: ParabolicBasic.Caloric.Regularity
+    declaration: ParabolicBasic.isSmoothCaloricOn_of_isVisc
+    related_declarations:
+      - ParabolicBasic.IsSmoothCaloricOn.norm_gradₓ_le
+    informal: >
+      A continuous viscosity solution of the heat equation on an open set of
+      space-time is C^infinity there and satisfies u_t = Lap u classically.
+    challenge: challenges/caloric-smooth
+    challenge_theorems: [ParabolicBasic.challenge_caloric_smooth]
+  - id: schauder-interior
+    kind: headline-theorem
+    expected_axioms: [propext, Quot.sound, Classical.choice]
+    title: Interior Schauder estimates for the heat equation
+    source: "Caffarelli (1989), L. Wang (1992), Safonov (1988): L^infinity Campanato iteration"
+    module: ParabolicBasic.Schauder.Iteration.Interior
+    declaration: ParabolicBasic.schauder_interior
+    related_declarations:
+      - ParabolicBasic.isC21On_of_polyApprox
+    informal: >
+      A continuous viscosity solution of u_t - Lap u = H in U x I, with H
+      locally parabolic-Hoelder of exponent alpha in (0, 1), is C^{2,1} with
+      u_t, the spatial gradient and the spatial Hessian locally
+      parabolic-Hoelder of exponent alpha.
+    challenge: challenges/schauder-interior
+    challenge_theorems: [ParabolicBasic.challenge_schauder_interior]
+  - id: perron-cylinder
+    kind: assembly-theorem
+    expected_axioms: [propext, Quot.sound, Classical.choice]
+    title: Perron's method on a space-time cylinder
+    source: "Crandall-Ishii-Lions, User's Guide, Section 4 (parabolic version)"
+    module: ParabolicBasic.Perron.Existence
+    declaration: ParabolicBasic.exists_viscSolution_cyl
+    informal: >
+      Under the packaged barrier hypothesis PerronBarriers, the Perron envelope
+      is a viscosity solution attaining the boundary data. The hypothesis is
+      discharged in caloric_dirichlet_ball and semilinear_exists, so this
+      target has no challenge of its own.
+supplemental_challenges:
+  - id: model-sanity
+    title: Sign convention, non-vacuity and parabolic boundary model cases
+    challenge: challenges/model-sanity
+    challenge_theorems:
+      - ParabolicBasic.challenge_time_not_viscSub
+      - ParabolicBasic.challenge_time_viscSuper
+      - ParabolicBasic.challenge_caloric_quadratic_solOn
+      - ParabolicBasic.challenge_parBdry_ball_nonempty

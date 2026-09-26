@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata in this file."
+title: "Parabolic Basic Theory"
+type: software
+authors:
+  - family-names: Feldman
+    given-names: William M.
+repository-code: "https://github.com/willmfeldman/parabolic-basic-theory"
+license: Apache-2.0
+version: 0.1.0
+abstract: >-
+  A Lean 4 formalization of the basic theory of the heat operator and of
+  semilinear heat equations: comparison for viscosity solutions, parabolic
+  Perron existence, regularity of viscosity caloric functions, interior
+  Schauder estimates, and the semilinear Cauchy–Dirichlet problem.

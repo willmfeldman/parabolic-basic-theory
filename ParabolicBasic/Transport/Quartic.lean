@@ -83,7 +83,7 @@ theorem lapₓ_spaceTimeQuartic_self (p₀ : E d × ℝ) : lapₓ (spaceTimeQuar
     ((contDiff_norm_sq ℝ).comp (contDiff_id.sub contDiff_const)).add contDiff_const
   have h0 : h p₀.1 = 0 := by simp [hhdef]
   have hmin : IsLocalMin h p₀.1 :=
-    IsMinOn.isLocalMin (fun y _ ↦ by simp only [mem_setOf_eq, h0]; positivity) univ_mem
+    IsMinOn.isLocalMin (fun y _ ↦ by simp only [mem_ofPred_eq, h0]; positivity) univ_mem
   rw [InnerProductSpace.laplacian_eq_iteratedFDeriv_orthonormalBasis _
     (EuclideanSpace.basisFun (Fin d) ℝ)]
   refine Finset.sum_eq_zero fun i _ ↦ ?_

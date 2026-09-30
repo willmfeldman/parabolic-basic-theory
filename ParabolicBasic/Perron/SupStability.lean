@@ -201,7 +201,7 @@ theorem isViscSubOn_perronUpper (H : PerronHyp V a b f g) :
     have hmem : ball z₀ ρ ∈ 𝓝 p := isOpen_ball.mem_nhds (mem_ball.2 hdpρ)
     filter_upwards [nhdsWithin_le_nhds hmem] with q hq
     have := hpmax (ball_subset_closedBall hq)
-    simp only [mem_setOf_eq] at this
+    simp only [mem_ofPred_eq] at this
     linarith
   have := hw.2.1.2 _ (hψ'c.add contDiff_const) p hpΩ htouch
   rw [dₜ_add_const, lapₓ_add_const] at this

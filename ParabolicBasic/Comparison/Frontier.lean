@@ -47,7 +47,7 @@ theorem comparison_frontier {Ω : Set (E d × ℝ)} (hΩ : IsOpen Ω) (hΩb : Bo
     ∀ p ∈ Ω, u p ≤ v p := by
   intro p hp
   obtain ⟨ρ, hρ, hρm, hmod⟩ := hGmod
-  haveI := locallyCompactSpace_toPointSet hΩ
+  have := locallyCompactSpace_toPointSet hΩ
   have hmonoG : ∀ p, Monotone (G p) := fun p r s hrs ↦ by
     have := hGmono p r s hrs
     nlinarith [mul_nonneg hγ.le (sub_nonneg.2 hrs)]

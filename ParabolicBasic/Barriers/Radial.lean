@@ -94,7 +94,7 @@ theorem laplacian_comp_real (hf : ContDiffAt ℝ 2 f (ψ x)) (hψ : ContDiffAt �
   rw [laplacian_eq_sum_fderiv_fderiv, laplacian_eq_sum_fderiv_fderiv, hDD,
     ← sum_fderiv_sq_eq_norm_gradient_sq, Finset.mul_sum, Finset.mul_sum, ← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl fun i _ ↦ ?_
-  simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
+  simp only [add_apply, smul_apply,
     ContinuousLinearMap.smulRight_apply, smul_eq_mul, Function.comp_apply]
   ring
 

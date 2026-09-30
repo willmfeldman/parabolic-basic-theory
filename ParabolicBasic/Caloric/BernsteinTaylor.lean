@@ -109,6 +109,7 @@ theorem hasDerivAt_comp_line {F : E d × ℝ → ℝ} {p e : E d × ℝ} {s : �
     simpa using ((hasDerivAt_id s).smul_const e).const_add p
   have := hF.hasFDerivAt.comp_hasDerivAt s hγ
   convert this using 1
+  · rfl
   rw [fderiv_eq_sum_partialDeriv]
   simp [mul_comm]
 
@@ -214,8 +215,8 @@ theorem hessₓ_apply_eq_sum {f : E d × ℝ → ℝ} {p : E d × ℝ} (hf : Con
     simp [hessₓ, iteratedFDeriv_two_apply]
   rw [e2]
   conv_lhs => rw [hsum]
-  simp only [map_sum, map_smul, ContinuousLinearMap.coe_sum', Finset.sum_apply,
-    ContinuousLinearMap.coe_smul', Pi.smul_apply, smul_eq_mul, Finset.mul_sum]
+  simp only [map_sum, map_smul, FunLike.coe_sum, Finset.sum_apply,
+    FunLike.coe_smul, Pi.smul_apply, smul_eq_mul, Finset.mul_sum]
   refine Finset.sum_congr rfl fun i _ ↦ Finset.sum_congr rfl fun k _ ↦ ?_
   rw [← e2]
   unfold hessₓ
@@ -340,7 +341,7 @@ theorem time0 : |v q - v (q.1, t₀)| ≤ Cw [Fin.last d] * M * (ρ / r) ^ 2 := 
     ⟨zero_le_one, le_rfl⟩ fun s hs ↦ by
       have hb := H.bound [Fin.last d] _ (H.time_mem ⟨hs.1, hs.2⟩)
       simp only [iterPartial_cons, iterPartial_nil, parOrder_cons, parOrder_nil,
-        if_true, add_zero] at hb
+        ite_true, add_zero] at hb
       rw [abs_mul]
       exact mul_le_mul (abs_time_le_of_mem_cCyl H.hq) hb (abs_nonneg _) (by positivity)
   simp only [time_end1, zero_smul, add_zero, mul_one] at key
@@ -363,7 +364,7 @@ theorem time1 : |v q - v (q.1, t₀) - (q.2 - t₀) * partialDeriv (Fin.last d) 
     (fun s hs ↦ by
       have hb := H.bound [Fin.last d, Fin.last d] _ (H.time_mem hs)
       simp only [iterPartial_cons, iterPartial_nil, parOrder_cons, parOrder_nil,
-        if_true, add_zero, Nat.reduceAdd] at hb
+        ite_true, add_zero, Nat.reduceAdd] at hb
       calc _ = |q.2 - t₀| ^ 2 * |partialDeriv (Fin.last d) (partialDeriv (Fin.last d) v)
             ((q.1, t₀) + s • ((0 : E d), q.2 - t₀))| := by rw [abs_mul, abs_mul]; ring
         _ ≤ _ := mul_le_mul H.abs_time_sq hb (abs_nonneg _) (by positivity))
@@ -390,7 +391,7 @@ theorem mixed : |(q.2 - t₀) * (partialDeriv (Fin.last d) v (q.1, t₀) -
       refine Finset.sum_le_sum fun i _ ↦ ?_
       have hb := H.bound [i.castSucc, Fin.last d] _ (H.space_mem ⟨hs.1, hs.2⟩)
       simp only [iterPartial_cons, iterPartial_nil, parOrder_cons, parOrder_nil,
-        Fin.castSucc_ne_last, if_true, if_false, add_zero, Nat.reduceAdd] at hb
+        Fin.castSucc_ne_last, ite_true, ite_false, add_zero, Nat.reduceAdd] at hb
       exact hb
   simp only [space_end1, zero_smul, add_zero, mul_one] at key
   rw [abs_mul]
@@ -414,7 +415,7 @@ theorem space0 : |v (q.1, t₀) - v (x₀, t₀)| ≤
       refine Finset.sum_le_sum fun i _ ↦ ?_
       have hb := H.bound [i.castSucc] _ (H.space_mem ⟨hs.1, hs.2⟩)
       simp only [iterPartial_cons, iterPartial_nil, parOrder_cons, parOrder_nil,
-        Fin.castSucc_ne_last, if_false, add_zero] at hb
+        Fin.castSucc_ne_last, ite_false, add_zero] at hb
       simpa using hb
   simp only [space_end1, zero_smul, add_zero, mul_one] at key
   rw [← H.pow_mul_bound]
@@ -477,7 +478,7 @@ theorem space1 : |v (q.1, t₀) - v (x₀, t₀) -
       refine Finset.sum_le_sum fun k _ ↦ ?_
       have hb := H.bound [i.castSucc, k.castSucc] _ (H.space_mem hs)
       simp only [iterPartial_cons, iterPartial_nil, parOrder_cons, parOrder_nil,
-        Fin.castSucc_ne_last, if_false, add_zero, Nat.reduceAdd] at hb
+        Fin.castSucc_ne_last, ite_false, add_zero, Nat.reduceAdd] at hb
       exact hb)
     ⟨zero_le_one, le_rfl⟩
   simp only [space_end1, zero_smul, add_zero, one_mul, one_pow, mul_one] at key
@@ -526,7 +527,7 @@ theorem space2 : |v (q.1, t₀) - v (x₀, t₀) -
       refine Finset.sum_le_sum fun l _ ↦ ?_
       have hb := H.bound [i.castSucc, k.castSucc, l.castSucc] _ (H.space_mem hs)
       simp only [iterPartial_cons, iterPartial_nil, parOrder_cons, parOrder_nil,
-        Fin.castSucc_ne_last, if_false, add_zero, Nat.reduceAdd] at hb
+        Fin.castSucc_ne_last, ite_false, add_zero, Nat.reduceAdd] at hb
       exact hb)
     ⟨zero_le_one, le_rfl⟩
   simp only [space_end1, zero_smul, add_zero, one_mul, one_pow, mul_one] at key

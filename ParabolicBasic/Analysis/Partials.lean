@@ -320,7 +320,7 @@ theorem norm_iteratedFDeriv_le_partials {k : ℕ} (hs : IsOpen s) (hf : ContDiff
   refine (norm_sum_le _ _).trans (Finset.sum_le_sum fun m _ ↦ ?_)
   rw [ContinuousMultilinearMap.map_smul_univ, norm_smul, norm_prod,
     ← iterPartial_ofFn_eq_iteratedFDeriv hs hf hz, Real.norm_eq_abs, mul_comm]
-  refine mul_le_mul_of_nonneg_left (Finset.prod_le_prod (fun _ _ ↦ norm_nonneg _)
+  refine mul_le_mul_of_nonneg_left (Finset.prod_le_prod₀ (fun _ _ ↦ norm_nonneg _)
     fun i _ ↦ ?_) (abs_nonneg _)
   simpa [Real.norm_eq_abs] using abs_ecoord_le (m i) (v i)
 

@@ -312,9 +312,8 @@ theorem exists_comparisonModulus_of_isCompact {K : Set (E d × ℝ)} {J : Set �
 theorem exists_continuous_eqOn_of_continuousOn {A : Set (E d × ℝ)} (hA : IsClosed A)
     {S : E d × ℝ → ℝ} (hS : ContinuousOn S A) :
     ∃ S' : E d × ℝ → ℝ, Continuous S' ∧ EqOn S' S A := by
-  obtain ⟨G, hG⟩ := ContinuousMap.exists_restrict_eq hA ⟨A.restrict S, hS.restrict⟩
+  obtain ⟨G, hG⟩ := ContinuousMap.exists_restrict_eq hA ⟨A.domRestrict S, hS.domRestrict⟩
   refine ⟨G, G.continuous, fun x hx ↦ ?_⟩
-  have := congrArg (fun f : C(A, ℝ) ↦ f ⟨x, hx⟩) hG
-  simpa using this
+  exact congrArg (fun f : C(A, ℝ) ↦ f ⟨x, hx⟩) hG
 
 end ParabolicBasic

@@ -135,7 +135,7 @@ theorem exteriorSphereAt_of_hasC2Boundary {U : Set (E d)} (hC2 : HasC2Boundary U
   have hUo : IsOpen U := hU ▸ isOpen_lt hφc continuous_const
   have hφξ : 0 ≤ φ ξ := by
     have h : ξ ∉ U := by rw [hUo.frontier_eq] at hξ; exact hξ.2
-    rw [hU, mem_setOf_eq, not_lt] at h
+    rw [hU, mem_ofPred_eq, not_lt] at h
     exact h
   have hcl : ∀ x ∈ closure U, φ x ≤ 0 := fun x hx ↦ by
     rw [hU] at hx

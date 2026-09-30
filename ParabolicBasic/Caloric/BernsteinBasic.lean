@@ -428,6 +428,8 @@ theorem hasFDerivAt_parAffine (x₀ : E d) (t₀ r : ℝ) (q : E d × ℝ) :
     HasFDerivAt (parAffine x₀ t₀ r) (parScale r) q := by
   have h := (parScale (d := d) r).hasFDerivAt (x := q) |>.const_add (x₀, t₀)
   convert h using 1
+  funext p
+  ext <;> simp [parScale]
 
 theorem parScale_ebasis (r : ℝ) (j : Fin (d + 1)) :
     parScale r (ebasis d j) = r ^ (if j = Fin.last d then 2 else 1) • ebasis d j := by

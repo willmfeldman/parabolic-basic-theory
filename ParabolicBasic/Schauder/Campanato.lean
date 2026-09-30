@@ -310,8 +310,9 @@ theorem continuousAt_of_pdist_bound {F : Type*} [NormedAddCommGroup F] {f : E d 
   have hpc : Continuous fun q ↦ pdist p q := by
     simpa only [pdist_comm p] using continuous_pdist_left p
   have hlim : Tendsto (fun q ↦ max C 0 * pdist p q ^ α) (𝓝 p) (𝓝 0) := by
-    simpa [Real.zero_rpow hα.ne'] using
-      (continuous_const.mul (Continuous.rpow_const hpc fun _ ↦ Or.inr hα.le)).tendsto p
+    have hc : Continuous fun q ↦ max C 0 * pdist p q ^ α :=
+      continuous_const.mul (Continuous.rpow_const hpc fun _ ↦ Or.inr hα.le)
+    simpa [Real.zero_rpow hα.ne'] using hc.tendsto p
   refine squeeze_zero' (Eventually.of_forall fun _ ↦ norm_nonneg _) ?_ hlim
   filter_upwards [hN, (hpc.tendsto p).eventually
     (gt_mem_nhds (by rw [pdist_self]; exact hη : pdist p p < η))] with q hq hqη
@@ -547,8 +548,8 @@ theorem isC21On_of_polyApprox {U : Set (E d)} {I : Set ℝ} (hU : IsOpen U) (hI 
         ≤ ∑ i, ∑ j, |hessEntry u i j q - hessEntry u i j p| := by
     intro p hp q hq
     refine ContinuousMultilinearMap.opNorm_le_bound (by positivity) fun m ↦ ?_
-    rw [ContinuousMultilinearMap.sub_apply, hDform q hq m, hDform p hp m,
-      ← ContinuousLinearMap.sub_apply, ← ContinuousLinearMap.sub_apply, ← CaloricPoly.bilin_sub,
+    rw [sub_apply, hDform q hq m, hDform p hp m,
+      ← sub_apply, ← sub_apply, ← CaloricPoly.bilin_sub,
       Fin.prod_univ_two]
     refine ((CaloricPoly.bilin _).le_opNorm₂ _ _).trans ?_
     rw [mul_assoc]

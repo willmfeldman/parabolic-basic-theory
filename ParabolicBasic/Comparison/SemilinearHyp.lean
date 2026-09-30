@@ -74,7 +74,7 @@ theorem exists_holderLip_extension {S : Set (E d)} {f : E d → ℝ → ℝ}
       (Real.rpow_nonneg dist_nonneg _))
   have hL : ∀ x ∈ S, ∀ z w, |f x z - f x w| ≤ L * |z - w| := fun x hx z w ↦
     (hL₀ x hx z w).trans (mul_le_mul_of_nonneg_right (le_max_left _ _) (abs_nonneg _))
-  haveI : Nonempty S := ⟨⟨y₀, hy₀⟩⟩
+  have : Nonempty S := ⟨⟨y₀, hy₀⟩⟩
   set g : E d → ℝ → ℝ := fun x z ↦ ⨅ y : S, (f y z + K * dist x y ^ α) with hgdef
   have hsub : ∀ x x' y : E d, dist x y ^ α ≤ dist x x' ^ α + dist x' y ^ α :=
     dist_rpow_le_add hα.le hα1
@@ -137,8 +137,7 @@ theorem exists_holderLip_extension {S : Set (E d)} {f : E d → ℝ → ℝ}
         fun _ ↦ Or.inr hα.le)).add (continuous_const.mul (continuous_snd.dist continuous_const))
     refine squeeze_zero (g := fun q : E d × ℝ ↦ K * dist q.1 q₀.1 ^ α + L * dist q.2 q₀.2)
       (fun q ↦ dist_nonneg) (fun q ↦ ?_) ?_
-    · change dist (g q.1 q.2) (g q₀.1 q₀.2) ≤ K * dist q.1 q₀.1 ^ α + L * dist q.2 q₀.2
-      rw [Real.dist_eq, Real.dist_eq q.2]
+    · rw [Real.dist_eq, Real.dist_eq q.2]
       calc |g q.1 q.2 - g q₀.1 q₀.2|
           ≤ |g q.1 q.2 - g q₀.1 q.2| + |g q₀.1 q.2 - g q₀.1 q₀.2| := abs_sub_le _ _ _
         _ ≤ K * dist q.1 q₀.1 ^ α + L * |q.2 - q₀.2| := add_le_add (hhol _ _ _) (hlip _ _ _)

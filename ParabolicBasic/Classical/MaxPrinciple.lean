@@ -114,7 +114,8 @@ theorem exists_isMaxOn_penalized (hΩo : IsOpen Ω) (hΩb : Bornology.IsBounded 
   have hfK : UpperSemicontinuousOn (fun q ↦ D q - ε * penalty T₁ q) K := by
     have hc : ContinuousOn (fun q ↦ -(ε * penalty T₁ q)) K :=
       (continuousOn_const.mul ((continuousOn_penalty T₁).mono fun q hq ↦ hKT q hq)).neg
-    simpa only [sub_eq_add_neg] using (hD.mono inter_subset_left).add hc.upperSemicontinuousOn
+    simp only [sub_eq_add_neg]
+    exact (hD.mono inter_subset_left).add hc.upperSemicontinuousOn
   have hq₁K : q₁ ∈ K := by
     refine ⟨subset_closure hq₁, ?_⟩
     by_contra h
@@ -131,7 +132,7 @@ theorem exists_isMaxOn_penalized (hΩo : IsOpen Ω) (hΩb : Bornology.IsBounded 
       have h2 := penalty_pos (d := d) hpT
       nlinarith
     have : p ∈ closure Ω \ frontier Ω := ⟨hpK.1, hnf⟩
-    rwa [closure_diff_frontier, hΩo.interior_eq] at this
+    rwa [closure_sdiff_frontier, hΩo.interior_eq] at this
   refine ⟨p, hpΩ, hppos, fun q hq ↦ ?_⟩
   by_cases hqK : q.2 ≤ T₁ - δ
   · exact hpmax ⟨subset_closure hq, hqK⟩
@@ -217,7 +218,7 @@ theorem domain_comparison_sub (hΩo : IsOpen Ω) (hΩb : Bornology.IsBounded Ω)
   by_cases hpΩ : p ∈ Ω
   · exact le_on_of_domain_comparison_sub hΩo hΩb hΩT hW hWusc hbc hb hheat hbdry p hpΩ
   · refine hbdry p ?_ hpT
-    rw [← closure_diff_interior, hΩo.interior_eq]
+    rw [← closure_sdiff_interior, hΩo.interior_eq]
     exact ⟨hp, hpΩ⟩
 
 /-- **Comparison on a bounded open set** (sub form, continuous `W`): the conclusion holds on all

@@ -63,14 +63,14 @@ library's names. Every file still imports `Mathlib` only.
 
 ## Toolchain
 
-- Lean: `leanprover/lean4:v4.30.0`
-- Mathlib: `v4.30.0`
+- Lean: `leanprover/lean4:v4.34.1`
+- Mathlib: `v4.34.1`
 - viscosity-solution-theory (`ViscositySolns`) and AleksandrovDifferentiability:
   pinned through the parent `lake-manifest.json`. The comparison, uniqueness,
   existence and Dirichlet solutions depend on them, so a comparator run on
   these challenges also transitively audits those projects.
 - Comparator: `leanprover/comparator`, with a `lean4export` build matching Lean
-  `v4.30.0` and the pinned `landrun` revision (see
+  `v4.34.1` and the pinned `landrun` revision (see
   `scripts/release-comparator.sh`); the release workflow runs on a standard
   GitHub-hosted Linux runner.
 
@@ -117,10 +117,10 @@ potentially adversarial. Review and trust the release checkout's
 
 ### Recorded acceptance
 
-The release Comparator workflow accepted all eight workspaces on 2026-09-26,
-on a standard GitHub-hosted Linux runner, with Lean `v4.30.0`, Mathlib
-`c5ea003`, Comparator `d03acab`, `landrun` `5ed4a3d`, and `lean4export`
-`a3e35a5`, on a release candidate with the same Lean sources as this
+The release Comparator workflow accepted all eight workspaces on 2026-09-30,
+on a standard GitHub-hosted Linux runner, with Lean `v4.34.1`, Mathlib
+`d13f23b`, Comparator `5756749`, `landrun` `811cfff`, and `lean4export`
+`076e8e5`, on a release candidate with the same Lean sources as this
 release:
 
 | Workspace | Statement comparison and kernel check | Axioms |

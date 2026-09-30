@@ -54,10 +54,10 @@ theorem exists_viscSolution_cyl {V : Set (E d)} (hV : IsOpen V) (hVb : Bornology
   /- The solution: `g` on `Γ`, `W^*` elsewhere. -/
   set u : E d × ℝ → ℝ := fun p ↦ if p ∈ parBdry V a b then g p else Wu p with hu_def
   have huΩ : EqOn u Wu (V ×ˢ Ioo a b) := fun p hp ↦
-    if_neg fun h ↦ notMem_cyl_of_mem_parBdry hV h hp
+    ite_eq_right fun h ↦ notMem_cyl_of_mem_parBdry hV h hp
   have huΩ' : EqOn u Wl (V ×ˢ Ioo a b) := fun p hp ↦ (huΩ hp).trans (heq p hp).symm
   refine ⟨u, ?_, (IsViscSubOn.congr huΩ).2 H.isViscSubOn_perronUpper,
-    (IsViscSuperOn.congr huΩ').2 H.isViscSuperOn_perronLower, fun p hp ↦ if_pos hp⟩
+    (IsViscSuperOn.congr huΩ').2 H.isViscSuperOn_perronLower, fun p hp ↦ ite_eq_left hp⟩
   /- Continuity on `Ω ∪ Γ`. -/
   intro z hz
   have hzcl : z ∈ closure V ×ˢ Icc a b :=
@@ -66,7 +66,7 @@ theorem exists_viscSolution_cyl {V : Set (E d)} (hV : IsOpen V) (hVb : Bornology
     rcases hz with hz | hz
     · rw [huΩ hz, heq z hz]
       exact ⟨le_rfl, le_rfl⟩
-    · rw [show u z = g z from if_pos hz]
+    · rw [show u z = g z from ite_eq_left hz]
       exact ⟨H.perronUpper_le_g hz, H.g_le_perronLower hz⟩
   refine ContinuousWithinAt.union ?_ ?_
   · rw [ContinuousWithinAt, tendsto_order]
@@ -89,6 +89,6 @@ theorem exists_viscSolution_cyl {V : Set (E d)} (hV : IsOpen V) (hVb : Bornology
       refine continuousWithinAt_of_notMem_closure ?_
       rw [hΓc.closure_eq]
       exact fun h ↦ notMem_cyl_of_mem_parBdry hV h hz
-    · exact (hg z hz).congr (fun q hq ↦ if_pos hq) (if_pos hz)
+    · exact (hg z hz).congr (fun q hq ↦ ite_eq_left hq) (ite_eq_left hz)
 
 end ParabolicBasic

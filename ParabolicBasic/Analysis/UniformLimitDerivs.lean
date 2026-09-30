@@ -101,7 +101,8 @@ theorem contDiffOn_of_tendstoLocallyUniformlyOn_iteratedFDeriv
     exact this.congr_right fun x hx ↦ tendsto_nhds_unique (this.tendsto_at hx) (hfg x hx)
   have h0' : TendstoLocallyUniformlyOn (fun n ↦ iteratedFDeriv ℝ 0 (f n))
       (iteratedFDeriv ℝ 0 g) l s := by
-    simpa [iteratedFDeriv_zero_eq_comp] using tendstoLocallyUniformlyOn_linearIsometryEquiv
+    simp only [iteratedFDeriv_zero_eq_comp]
+    exact tendstoLocallyUniformlyOn_linearIsometryEquiv
       (continuousMultilinearCurryFin0 ℝ V F).symm h0
   -- regularity of the `fₙ`
   have hcont : ∀ n, ∀ j ≤ k, ContinuousOn (iteratedFDeriv ℝ j (f n)) s := fun n j hj ↦

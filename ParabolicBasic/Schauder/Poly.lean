@@ -255,7 +255,7 @@ noncomputable def bilin (M : Matrix (Fin d) (Fin d) ℝ) : E d →L[ℝ] E d →
 
 theorem bilin_apply (M : Matrix (Fin d) (Fin d) ℝ) (v w : E d) :
     bilin M v w = ∑ i, ∑ j, M i j * v i * w j := by
-  simp [bilin, ContinuousLinearMap.sum_apply, mul_assoc]
+  simp [bilin, sum_apply, mul_assoc]
 
 theorem bilin_add (M M' : Matrix (Fin d) (Fin d) ℝ) : bilin (M + M') = bilin M + bilin M' := by
   simp [bilin, add_smul, Finset.sum_add_distrib]
@@ -289,7 +289,7 @@ theorem eq_bilin (T : E d →L[ℝ] E d →L[ℝ] ℝ) :
   rw [bilin_apply]
   conv_lhs => rw [← (EuclideanSpace.basisFun (Fin d) ℝ).sum_repr v,
     ← (EuclideanSpace.basisFun (Fin d) ℝ).sum_repr w]
-  simp only [map_sum, map_smul, ContinuousLinearMap.sum_apply, ContinuousLinearMap.smul_apply,
+  simp only [map_sum, map_smul, sum_apply, smul_apply,
     smul_eq_mul, EuclideanSpace.basisFun_apply, EuclideanSpace.basisFun_repr, Matrix.of_apply,
     Finset.mul_sum]
   rw [Finset.sum_comm]
@@ -359,7 +359,7 @@ noncomputable def rescale (P : CaloricPoly d) (r lam : ℝ) : CaloricPoly d wher
 theorem recenter_eval (P : CaloricPoly d) (h z : E d × ℝ) :
     (P.recenter h).eval z = P.eval (z + h) := by
   simp only [eval_eq_bilin, recenter_a, recenter_b, recenter_c, recenter_M, Prod.fst_add,
-    Prod.snd_add, inner_add_left, inner_add_right, map_add, ContinuousLinearMap.add_apply,
+    Prod.snd_add, inner_add_left, inner_add_right, map_add, add_apply,
     inner_toEuclideanLin P.symm, bilin_symm P.symm z.1 h.1, real_inner_comm z.1 P.b]
   ring
 
@@ -376,7 +376,7 @@ theorem IsDegLE.recenter {P : CaloricPoly d} {k : ℕ} (hP : P.IsDegLE k) (h : E
 theorem rescale_eval (P : CaloricPoly d) (r lam : ℝ) (q : E d × ℝ) :
     (P.rescale r lam).eval q = P.eval (r • q.1, r ^ 2 * q.2) / lam := by
   simp only [eval_eq_bilin, rescale_a, rescale_b, rescale_c, rescale_M, bilin_smul,
-    real_inner_smul_left, real_inner_smul_right, map_smul, ContinuousLinearMap.smul_apply,
+    real_inner_smul_left, real_inner_smul_right, map_smul, smul_apply,
     smul_eq_mul]
   ring
 
@@ -446,7 +446,7 @@ theorem hasFDerivAt_eval_slice (P : CaloricPoly d) (s : ℝ) (y : E d) :
   have key : ∀ h, P.eval (y + h, s) - P.eval (y, s) - (innerSL ℝ P.b + bilin P.M y) h =
       (1 / 2) * bilin P.M h h := by
     intro h
-    simp only [eval_eq_bilin, map_add, ContinuousLinearMap.add_apply, innerSL_apply_apply,
+    simp only [eval_eq_bilin, map_add, add_apply, innerSL_apply_apply,
       inner_add_right, bilin_symm P.symm h y]
     ring
   simp only [key]

@@ -60,15 +60,15 @@ lake build
 
 ## Dependencies
 
-- [Mathlib](https://github.com/leanprover-community/mathlib4) `v4.30.0`.
+- [Mathlib](https://github.com/leanprover-community/mathlib4) `v4.34.1`.
 - [viscosity-solution-theory](https://github.com/willmfeldman/viscosity-solution-theory)
-  [`v0.2.0`](https://github.com/willmfeldman/viscosity-solution-theory/releases/tag/v0.2.0)
+  [`v0.3.0`](https://github.com/willmfeldman/viscosity-solution-theory/releases/tag/v0.3.0)
   (library `ViscositySolns`). It supplies the elliptic Crandall–Ishii–Lions
   theory: the Crandall–Ishii lemma and the strict comparison theorem, applied
   to the heat operator through the linear isomorphism `E d × ℝ ≃ ℝᵈ⁺¹`
   (`ParabolicBasic/Transport/`). Its Perron existence theorem is not used.
 - [aleksandrov-differentiability](https://github.com/willmfeldman/aleksandrov-differentiability)
-  [`v0.2.0`](https://github.com/willmfeldman/aleksandrov-differentiability/releases/tag/v0.2.0),
+  [`v0.3.0`](https://github.com/willmfeldman/aleksandrov-differentiability/releases/tag/v0.3.0),
   a dependency of `ViscositySolns`.
 
 ## Layout

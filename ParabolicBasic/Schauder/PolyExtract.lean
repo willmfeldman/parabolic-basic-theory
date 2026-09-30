@@ -74,7 +74,7 @@ theorem coeff_bound {P : CaloricPoly d} {r ε : ℝ} (hr : 0 < r)
     have e : ∀ σ : ℝ, P.eval ((σ * η) • v, (0 : ℝ)) =
         P.a + σ * η * ⟪P.b, v⟫ + (1 / 2) * (σ * η) ^ 2 * bilin P.M v v := by
       intro σ
-      simp only [eval_eq_bilin, real_inner_smul_right, map_smul, ContinuousLinearMap.smul_apply,
+      simp only [eval_eq_bilin, real_inner_smul_right, map_smul, smul_apply,
         smul_eq_mul, mul_zero, add_zero]
       ring
     have h1 := abs_le.1 (hmem _ (hq 1 (by simp)))
@@ -106,8 +106,8 @@ theorem coeff_bound {P : CaloricPoly d} {r ε : ℝ} (hr : 0 < r)
             gcongr; exact (norm_add_le _ _).trans (by rw [he, he])
         _ = 1 := by norm_num
     have hB : bilin P.M v v = (1 / 4) * (P.M i i + 2 * P.M i j + P.M j j) := by
-      simp only [v, map_smul, map_add, ContinuousLinearMap.smul_apply,
-        ContinuousLinearMap.add_apply, bilin_single, smul_eq_mul, P.symm.apply i j]
+      simp only [v, map_smul, map_add, smul_apply,
+        add_apply, bilin_single, smul_eq_mul, P.symm.apply i j]
       ring
     have key : P.M i j = 2 * bilin P.M v v - (P.M i i + P.M j j) / 2 := by rw [hB]; ring
     have h1 := (hsp v hv).1

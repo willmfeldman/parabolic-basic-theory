@@ -113,11 +113,11 @@ theorem isViscSuperOn_perronLower (H : PerronHyp V a b f g) :
     linarith
   /- The bumped function `Ŵ`. -/
   set Wh : E d × ℝ → ℝ := fun p ↦ if p ∈ ball z₀ r then max (Wu p) (ψt p) else Wu p with hWh_def
-  have hWh_in : ∀ p ∈ ball z₀ r, Wh p = max (Wu p) (ψt p) := fun p hp ↦ if_pos hp
+  have hWh_in : ∀ p ∈ ball z₀ r, Wh p = max (Wu p) (ψt p) := fun p hp ↦ ite_eq_left hp
   have hWh_out : ∀ p, r / 2 < dist p z₀ → Wh p = Wu p := fun p hp ↦ by
     by_cases hpB : p ∈ ball z₀ r
     · rw [hWh_in p hpB, max_eq_left (hann p (mem_ball.1 hpB) hp)]
-    · exact if_neg hpB
+    · exact ite_eq_right hpB
   set O₂ : Set (E d × ℝ) := {p | r / 2 < dist p z₀} with hO₂_def
   have hO₂ : IsOpen O₂ := isOpen_lt continuous_const (continuous_id.dist continuous_const)
   have hO₂mem : ∀ p, p ∉ ball z₀ r → p ∈ O₂ := fun p hp ↦ by
@@ -146,7 +146,7 @@ theorem isViscSuperOn_perronLower (H : PerronHyp V a b f g) :
         exact (hWu_sub.mono_set (hO₂.inter hΩo) inter_subset_right).of_eqOn
           fun q hq ↦ (hWh_out q hq.1).symm
     · have hqB : q ∉ ball z₀ r := fun h ↦ notMem_cyl_of_mem_parBdry H.isOpen hq (hBΩ h)
-      rw [show Wh q = Wu q from if_neg hqB]
+      rw [show Wh q = Wu q from ite_eq_right hqB]
       exact H.perronUpper_le_g hq
   /- (iii) Contradiction at points where `W` is close to `W_*(z₀)`. -/
   have hfreq := frequently_lt_of_lowerEnv_lt (subset_closure hz₀) hup

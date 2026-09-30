@@ -90,7 +90,9 @@ theorem dₜ_quartic (p : E d × ℝ) : dₜ (quartic p) p = 0 := by
   have h : HasDerivAt (fun s : ℝ ↦ (‖p.1 - p.1‖ ^ 2) ^ 2 + (s - p.2) ^ 4)
       (0 + 4 * (p.2 - p.2) ^ 3 * 1) p.2 := by
     refine (hasDerivAt_const _ _).add ?_
-    simpa using ((hasDerivAt_id p.2).sub_const p.2).pow 4
+    have h4 : HasDerivAt (fun s : ℝ ↦ (s - p.2) ^ 4) _ p.2 :=
+      ((hasDerivAt_id p.2).sub_const p.2).pow 4
+    simpa using h4
   simp only [dₜ, quartic]
   rw [h.deriv]
   simp

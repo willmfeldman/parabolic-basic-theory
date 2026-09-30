@@ -348,7 +348,7 @@ theorem IsSmoothCaloricOn.abs_iterPartial_le (w : List (Fin (d + 1))) : ∃ C : 
   | cast i =>
     -- a space letter: Bernstein on the half cylinder, applied to `∂^{w'} v`
     have hlt : bernsteinMeasure w' < n := by
-      rw [← hn, bernsteinMeasure, if_neg (Fin.castSucc_ne_last i)]; omega
+      rw [← hn, bernsteinMeasure, ite_eq_right (Fin.castSucc_ne_last i)]; omega
     obtain ⟨C', hC'0, hC'⟩ := ih _ hlt w' rfl
     refine ⟨CB * C' * 2 ^ (parOrder w' + 1), by positivity,
       fun {v O x₀ t₀ r M} hO hr hsub hv hM ↦ ?_⟩
@@ -363,14 +363,14 @@ theorem IsSmoothCaloricOn.abs_iterPartial_le (w : List (Fin (d + 1))) : ∃ C : 
       have hsq := closedParCyl_half_subset hq
       exact hC' hO hr2 (hsq.trans hsub) hv fun q' hq' ↦ hM q' (hsq hq')
     have h := hCB hO hr2 (hhalf.trans hsub) hg hbd i
-    simp only [iterPartial_cons, parOrder_cons, if_neg (Fin.castSucc_ne_last i)]
+    simp only [iterPartial_cons, parOrder_cons, ite_eq_right (Fin.castSucc_ne_last i)]
     exact h.trans (le_of_eq (half_scale CB C' M r (parOrder w') hr))
   | last =>
     -- the time letter: `∂ₜ g = ∑ᵢ ∂ᵢ∂ᵢ g` on the smooth caloric `g = ∂^{w'} v`
     have hlt : ∀ i : Fin d, bernsteinMeasure (i.castSucc :: i.castSucc :: w') < n := by
       intro i
       rw [← hn]
-      simp only [bernsteinMeasure, if_neg (Fin.castSucc_ne_last i), if_true]
+      simp only [bernsteinMeasure, ite_eq_right (Fin.castSucc_ne_last i), ite_true]
       omega
     have hC := fun i : Fin d ↦ ih _ (hlt i) (i.castSucc :: i.castSucc :: w') rfl
     choose C hC0 hC using hC
@@ -378,13 +378,13 @@ theorem IsSmoothCaloricOn.abs_iterPartial_le (w : List (Fin (d + 1))) : ∃ C : 
       fun {v O x₀ t₀ r M} hO hr hsub hv hM ↦ ?_⟩
     have hp : (x₀, t₀) ∈ O := hsub (center_mem_closedParCyl x₀ t₀ hr.le)
     have hg := hv.iteratedPartial hO w'
-    simp only [iterPartial_cons, parOrder_cons, if_true]
+    simp only [iterPartial_cons, parOrder_cons, ite_true]
     rw [hg.partialDeriv_last_eq hO hp]
     refine (Finset.abs_sum_le_sum_abs _ _).trans ?_
     rw [Finset.sum_mul, Finset.sum_div]
     refine Finset.sum_le_sum fun i _ ↦ ?_
     have := hC i hO hr hsub hv hM
-    simp only [iterPartial_cons, parOrder_cons, if_neg (Fin.castSucc_ne_last i)] at this
+    simp only [iterPartial_cons, parOrder_cons, ite_eq_right (Fin.castSucc_ne_last i)] at this
     rw [show 1 + (1 + parOrder w') = 2 + parOrder w' by omega] at this
     exact this
 

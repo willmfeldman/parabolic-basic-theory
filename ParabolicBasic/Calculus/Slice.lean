@@ -264,8 +264,7 @@ theorem lapₓ_sub (hφ : ContDiff ℝ 2 φ) (hh : ContDiff ℝ 2 h) (q : E d ×
 
 theorem lapₓ_const_mul (hh : ContDiff ℝ 2 h) (a : ℝ) (q : E d × ℝ) :
     lapₓ (fun q ↦ a * h q) q = a * lapₓ h q := by
-  have := laplacian_smul (𝕜 := ℝ) (x := q.1) a (contDiff_sliceX hh q.2).contDiffAt
-  simpa [lapₓ] using this
+  exact laplacian_smul (𝕜 := ℝ) (x := q.1) a (contDiff_sliceX hh q.2).contDiffAt
 
 /-- Adding a constant does not change `lapₓ` (no regularity needed). -/
 theorem lapₓ_add_const (h : E d × ℝ → ℝ) (b : ℝ) (q : E d × ℝ) :
@@ -278,8 +277,7 @@ theorem lapₓ_add_const (h : E d × ℝ → ℝ) (b : ℝ) (q : E d × ℝ) :
 theorem lapₓ_neg (h : E d × ℝ → ℝ) (q : E d × ℝ) :
     lapₓ (fun q ↦ -h q) q = -lapₓ h q := by
   simp only [lapₓ]
-  have := congrFun (laplacian_neg (f := fun y : E d ↦ h (y, q.2))) q.1
-  simpa using this
+  exact congrFun (laplacian_neg (f := fun y : E d ↦ h (y, q.2))) q.1
 
 /-- Heat operator of a perturbation `φ + (a h + b)`. -/
 theorem dₜ_sub_lapₓ_add_mul_add (hφ : ContDiff ℝ 2 φ) (hh : ContDiff ℝ 2 h) (a b : ℝ)

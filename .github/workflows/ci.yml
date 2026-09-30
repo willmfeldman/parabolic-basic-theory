@@ -18,23 +18,24 @@ jobs:
         run: |
           curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
-      # Mathlib and its dependencies come from `lake exe cache get`, so only
-      # cache this project's build and the two dependencies Mathlib's cache
-      # does not cover. Caching all of `.lake` (~2.6 GB) exhausted runner disk.
+      # Mathlib and its dependencies come from `lake exe cache get`, and Lake downloads
+      # viscosity_solns and AleksandrovDifferentiability from their releases' prebuilt build
+      # archives, so cache only this project's own build. A restored dependency build folder
+      # would stop Lake from downloading the archive. Caching all of `.lake` exhausts runner disk.
       - name: Restore Lake artifacts
         uses: actions/cache/restore@v6
         with:
-          path: |
-            .lake/build
-            .lake/packages/viscosity_solns
-            .lake/packages/AleksandrovDifferentiability
+          path: .lake/build
           key: lake-build-${{ runner.os }}-${{ hashFiles('lake-manifest.json', 'lean-toolchain') }}-${{ hashFiles('ParabolicBasic.lean', 'ParabolicBasic/**/*.lean') }}
           restore-keys: |
             lake-build-${{ runner.os }}-${{ hashFiles('lake-manifest.json', 'lean-toolchain') }}-
+            lake-build-${{ runner.os }}-${{ hashFiles('lean-toolchain') }}-
       - name: Fetch mathlib cache
         run: lake exe cache get
+      # Warnings are errors: the release gate requires a warning-free build. This includes a failed
+      # download of a dependency's prebuilt build archive (Lake reports that as a warning).
       - name: Build complete library
-        run: lake build
+        run: lake build --wfail
       - name: Check trusted library source
         shell: python3 {0}
         run: |
@@ -136,6 +137,19 @@ jobs:
           find ParabolicBasic -type f -name '*.lean' -exec wc -l {} + | \
             awk '$2 != "total" && $1 >= 1000 { print; bad = 1 } END { exit bad }'
           test "$(wc -l < ParabolicBasic.lean)" -lt 1000
+      - name: Check every library file is a Lean module
+        shell: python3 {0}
+        run: |
+          from pathlib import Path
+          import re
+
+          # The first token after the leading comments must be `module`.
+          prefix = re.compile(r"\A(?:\s+|--[^\n]*|/-(?:[^-]|-(?!/))*-/)*")
+          paths = [Path("ParabolicBasic.lean"), *Path("ParabolicBasic").rglob("*.lean")]
+          bad = [str(p) for p in paths
+                 if not re.match(r"module\b", prefix.sub("", p.read_text(encoding="utf-8"), count=1))]
+          if bad:
+              raise SystemExit("not a Lean module:\n" + "\n".join(sorted(bad)))
       - name: Validate manifest, library Lean names, and exact target axioms
         run: ruby scripts/check-formalization-manifest.rb
       - name: Check challenge solutions for sorry, axioms, and native_decide
@@ -150,8 +164,5 @@ jobs:
         uses: actions/cache/save@v6
         if: always()
         with:
-          path: |
-            .lake/build
-            .lake/packages/viscosity_solns
-            .lake/packages/AleksandrovDifferentiability
+          path: .lake/build
           key: lake-build-${{ runner.os }}-${{ hashFiles('lake-manifest.json', 'lean-toolchain') }}-${{ hashFiles('ParabolicBasic.lean', 'ParabolicBasic/**/*.lean') }}

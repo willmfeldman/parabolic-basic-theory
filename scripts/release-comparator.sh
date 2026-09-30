@@ -1,13 +1,19 @@
 #!/usr/bin/env bash
+# Release gate: install the pinned Comparator tools and run Comparator on every
+# challenges/*/config.json, writing an attestation report to comparator-report/.
+# Used by .github/workflows/release-comparator.yml on a fresh GitHub-hosted Linux runner.
+#
+# Usage: scripts/release-comparator.sh install|run
 set -euo pipefail
 
-# Immutable upstream source revisions. lean4export is built with this repository's
-# exact lean-toolchain, since its olean reader must match the challenge toolchain.
-COMPARATOR_REV=d03acab154d269c06e60e4de7e4cc85deebff94b
-LANDRUN_REV=5ed4a3db3a4ad930d577215c6b9abaa19df7f99f
-LEAN4EXPORT_REV=a3e35a584f59b390667db7269cd37fca8575e4bf
+# Immutable upstream source revisions. lean4export is built with this repository's exact
+# lean-toolchain, since its olean reader must match the challenge toolchain. These revisions are
+# also recorded in formalization.yaml (checked by scripts/check-formalization-manifest.rb).
+COMPARATOR_REV=575674928e239f5bc452aab72d1dd7b0f1326494
+LANDRUN_REV=811cfff51ceaf3d9843708aa6d22e9b84ccac8b4
+LEAN4EXPORT_REV=076e8e57707e813375e8f9da8bf989799ace9680
 ROOT=$(git rev-parse --show-toplevel)
-TOOLS="$RUNNER_TEMP/comparator-tools"
+TOOLS="${RUNNER_TEMP:-/tmp}/comparator-tools"
 REPORT="$ROOT/comparator-report"
 mkdir -p "$REPORT/logs"
 
@@ -36,41 +42,55 @@ run() {
   export COMPARATOR_LANDRUN="$TOOLS/bin/landrun"
   export COMPARATOR_LEAN4EXPORT="$TOOLS/bin/lean4export"
   export PATH="$TOOLS/bin:$PATH"
-  python3 - "$ROOT" "$REPORT" "$COMPARATOR_REV" "$LANDRUN_REV" "$LEAN4EXPORT_REV" <<'PY'
-import json, os, pathlib, subprocess, sys
-root, report = map(pathlib.Path, sys.argv[1:3])
-comparator, landrun, lean4export = sys.argv[3:]
+  python3 - "$ROOT" "$REPORT" "$TOOLS" "$COMPARATOR_REV" "$LANDRUN_REV" "$LEAN4EXPORT_REV" <<'PY'
+import json, pathlib, subprocess, sys
+root, report, tools = map(pathlib.Path, sys.argv[1:4])
+comparator, landrun, lean4export = sys.argv[4:]
 def out(*args): return subprocess.check_output(args, cwd=root, text=True).strip()
+# The workflow validates this inventory against formalization.yaml
+# (scripts/check-formalization-manifest.rb --metadata-only) before installing any tools.
 configs = sorted(root.glob('challenges/*/config.json'))
-expected = {'caloric-dirichlet-ball','caloric-smooth','classical-viscosity','model-sanity','schauder-interior','semilinear-comparison','semilinear-existence','semilinear-regularity'}
-if {p.parent.name for p in configs} != expected:
-    raise SystemExit('Challenge configuration set differs from the required workspaces')
-data = {'commit':out('git','rev-parse','HEAD'), 'tree':out('git','rev-parse','HEAD^{tree}'),
-        'lean_toolchain':(root/'lean-toolchain').read_text().strip(),
-        'lean_version':out('lean','--version'),
-        'mathlib_revision':next(p['rev'] for p in json.loads((root/'lake-manifest.json').read_text())['packages'] if p['name']=='mathlib'),
-        'tools':{'comparator':comparator,'landrun':landrun,'lean4export':lean4export},
-        'sandbox_note':'Comparator is invoked with landrun on a standard hosted Linux runner. Upstream documents a landrun sandbox caveat requiring systemd-run containment for a full adversarial guarantee; this workflow does not claim that stronger guarantee. Before Comparator runs, the workflow downloads the Mathlib cache and builds the trusted library outside the sandbox; the challenge workspaces share that dependency folder read-only.',
-        'results':[]}
-(report/'attestation.json').write_text(json.dumps(data,indent=2)+'\n')
+if not configs:
+    raise SystemExit('No challenge configurations found')
+manifest = json.loads((root / 'lake-manifest.json').read_text())
+data = {
+    'commit': out('git', 'rev-parse', 'HEAD'),
+    'tree': out('git', 'rev-parse', 'HEAD^{tree}'),
+    'lean_toolchain': (root / 'lean-toolchain').read_text().strip(),
+    'lean_version': out('lean', '--version'),
+    'mathlib_revision': next(p['rev'] for p in manifest['packages'] if p['name'] == 'mathlib'),
+    'tools': {'comparator': comparator, 'landrun': landrun, 'lean4export': lean4export},
+    'sandbox_note': (
+        'Comparator is invoked with landrun on a standard GitHub-hosted Linux runner. Upstream '
+        'documents a landrun sandbox caveat requiring systemd-run containment for a full '
+        'adversarial guarantee; this workflow does not claim that stronger guarantee. Before '
+        'Comparator runs, the workflow downloads the Mathlib cache and builds the trusted library '
+        'and the trusted Challenge targets outside the sandbox; the challenge workspaces share '
+        'that dependency folder read-only.'),
+    'results': [],
+}
+def write(): (report / 'attestation.json').write_text(json.dumps(data, indent=2) + '\n')
+write()
 failed = False
 for config in configs:
     cfg = json.loads(config.read_text())
-    if sorted(cfg['permitted_axioms']) != ['Classical.choice','Quot.sound','propext']:
+    if sorted(cfg['permitted_axioms']) != ['Classical.choice', 'Quot.sound', 'propext']:
         raise SystemExit(f'Unexpected axiom allowance in {config}')
     name = config.parent.name
-    with (report/'logs'/f'{name}.log').open('w') as log:
-        result = subprocess.run(['lake','env',os.environ['RUNNER_TEMP']+'/comparator-tools/bin/comparator',str(config.resolve())],cwd=config.parent,stdout=log,stderr=subprocess.STDOUT)
-    item = {'config':str(config.relative_to(root)),'theorems':cfg['theorem_names'],
-            'permitted_axioms':cfg['permitted_axioms'], 'axiom_check':'passed' if result.returncode == 0 else 'failed',
-            'exit_code':result.returncode,'result':'PASS' if result.returncode == 0 else 'FAIL',
-            'log':f'logs/{name}.log'}
-    data['results'].append(item)
-    (report/'attestation.json').write_text(json.dumps(data,indent=2)+'\n')
-    failed |= result.returncode != 0
-    print(f'{name}: {item["result"]}',flush=True)
+    with (report / 'logs' / f'{name}.log').open('w') as log:
+        result = subprocess.run(['lake', 'env', str(tools / 'bin' / 'comparator'), str(config.resolve())],
+                                cwd=config.parent, stdout=log, stderr=subprocess.STDOUT)
+    ok = result.returncode == 0
+    data['results'].append({
+        'config': str(config.relative_to(root)), 'theorems': cfg['theorem_names'],
+        'permitted_axioms': cfg['permitted_axioms'],
+        'axiom_check': 'passed' if ok else 'failed', 'exit_code': result.returncode,
+        'result': 'PASS' if ok else 'FAIL', 'log': f'logs/{name}.log'})
+    write()
+    failed |= not ok
+    print(f'{name}: {"PASS" if ok else "FAIL"}', flush=True)
 data['overall_result'] = 'FAIL' if failed else 'PASS'
-(report/'attestation.json').write_text(json.dumps(data,indent=2)+'\n')
+write()
 sys.exit(1 if failed else 0)
 PY
 }

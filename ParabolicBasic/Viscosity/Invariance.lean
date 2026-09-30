@@ -76,8 +76,9 @@ theorem IsViscSuperOn.comp_parAffine {Ω : Set (E d × ℝ)} {F : E d × ℝ →
   have := (isViscSuperOn_neg_iff.1 hu).comp_parAffine (x₀ := x₀) (t₀ := t₀) hr
   rw [isViscSuperOn_neg_iff]
   convert this using 1
-  funext q z
-  ring
+  · funext q z
+    ring
+  · rfl
 
 /-! ### Adding a `C²` function -/
 

@@ -83,7 +83,7 @@ theorem IsSepBarrier.exists_const (hw : IsSepBarrier V a b z φ τ)
         ((hw.continuousOn_cyl.mono (parBdry_subset_closure V hab)).mono inter_subset_left)
       have hq₀z : q₀ ≠ z := fun h ↦ by
         have := hq₀.2
-        rw [mem_setOf_eq, h, dist_self] at this
+        rw [mem_ofPred_eq, h, dist_self] at this
         linarith
       exact ⟨w q₀, hw.pos q₀ hq₀.1 hq₀z, fun q hq hqδ ↦ hmin ⟨hq, hqδ⟩⟩
   refine ⟨max Mf (2 * Mg / c), le_max_of_le_left hMf, fun x hx r ↦

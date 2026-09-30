@@ -152,9 +152,9 @@ theorem taylor_approx : ∃ C : ℝ, 0 ≤ C ∧ ∀ k ≤ 2, ∀ {h : E d × �
     (hcal.1.contDiffAt (hO.mem_nhds hmem0)).of_le (WithTop.coe_le_coe.2 le_top)
   have hh0 : |h 0| ≤ 1 := hh1 0 hmem0
   have hg : ‖gradₓ h 0‖ ≤ Cg := by
-    simpa using hG hO one_pos subset_rfl hcal hh1
+    simpa [Prod.mk_zero_zero] using hG hO one_pos subset_rfl hcal hh1
   have ht : |dₜ h 0| ≤ Ct := by
-    simpa using hTt hO one_pos subset_rfl hcal hh1
+    simpa [Prod.mk_zero_zero] using hTt hO one_pos subset_rfl hcal hh1
   have hM : ∀ i j, |hessMat h i j| ≤ Ch := fun i j ↦ by
     have a := hHs hO one_pos subset_rfl hcal hh1 i j
     have b := hHs hO one_pos subset_rfl hcal hh1 j i

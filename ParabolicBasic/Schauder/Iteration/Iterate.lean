@@ -508,7 +508,7 @@ theorem expansion_at_origin (k : ℕ) (hk : k ≤ 2) {α : ℝ} (hα : 0 < α �
   refine ⟨ρ ^ ((k : ℝ) + α) / 4, C₀ / (1 - ρ ^ α), (1 + C₀ / (1 - ρ ^ α)) / ρ ^ ((k : ℝ) + α),
     by positivity, hC₁, div_nonneg (by linarith) hργ.le, ?_⟩
   intro u H σ θ P₀ hu hsol hP₀ hσ hu₀ hθ0 hθ hH
-  haveI : Nonempty (CaloricPoly d) := ⟨0⟩
+  have : Nonempty (CaloricPoly d) := ⟨0⟩
   have hstep : ∀ (n : ℕ) (P : CaloricPoly d), (P.IsDegLE k ∧ P.src = σ ∧
       ∀ q ∈ cCyl (0 : E d) 0 (ρ ^ n), |u q - P.eval q| ≤ (ρ ^ n) ^ ((k : ℝ) + α)) →
       ∃ Q : CaloricPoly d, Q.src = 0 ∧ Q.IsDegLE k ∧ Q.coeffNorm ≤ C₀ ∧

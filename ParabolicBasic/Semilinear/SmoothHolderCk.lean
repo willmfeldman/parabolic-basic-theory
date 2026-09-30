@@ -74,7 +74,7 @@ theorem partialDeriv_comp_graph {G : (E d × ℝ) × ℝ → ℝ} {u : E d × �
   have h2 : HasFDerivAt (fun q ↦ G (q, u q)) _ p := hG.hasFDerivAt.comp p h1
   simp only [partialDeriv]
   rw [h2.fderiv]
-  simp only [ContinuousLinearMap.coe_comp', Function.comp_apply,
+  simp only [ContinuousLinearMap.coe_comp, Function.comp_apply,
     ContinuousLinearMap.prod_apply, ContinuousLinearMap.coe_id', id_eq]
   have e : ((ebasis d j, fderiv ℝ u p (ebasis d j)) : (E d × ℝ) × ℝ) =
       (ebasis d j, 0) + (fderiv ℝ u p (ebasis d j)) • ((0 : E d × ℝ), (1 : ℝ)) := by

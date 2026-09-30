@@ -114,6 +114,7 @@ theorem le_lowerEnv_of_continuousWithinAt (hz : z ∈ closure S) (hup : ∀ q �
     φ z ≤ lowerEnv S W z := by
   have := upperEnv_le_of_continuousWithinAt (W := fun q ↦ -W q) (m := -M) hz
     (fun q hq ↦ neg_le_neg (hup q hq)) hφ.neg (fun q hq ↦ neg_le_neg (h q hq))
+  rw [Pi.neg_apply] at this
   unfold lowerEnv
   linarith
 

@@ -230,15 +230,15 @@ theorem upperSemicontinuousOn_topPenalty {w : E d × ℝ → ℝ} {s : Set (E d 
     have hopen : {q : E d × ℝ | q.2 < b'} ∈ 𝓝[s] p :=
       mem_nhdsWithin_of_mem_nhds ((isOpen_lt continuous_snd continuous_const).mem_nhds hpb)
     filter_upwards [hopen] with q hq
-    simp only [topPenalty, if_pos hq]
+    simp only [topPenalty, ite_eq_left hq]
     ring
   · intro y hy
-    simp only [topPenalty, if_neg hpb] at hy
+    simp only [topPenalty, ite_eq_right hpb] at hy
     set θ := η / (M - c + 1) with hθ
     have hθpos : 0 < θ := div_pos hη (by linarith)
     have hnear : {q : E d × ℝ | b' - θ < q.2} ∈ 𝓝[s] p :=
       mem_nhdsWithin_of_mem_nhds ((isOpen_lt continuous_const continuous_snd).mem_nhds
-        (by simp only [mem_setOf_eq]; linarith [not_lt.1 hpb]))
+        (by simp only [mem_ofPred_eq]; linarith [not_lt.1 hpb]))
     filter_upwards [hnear, self_mem_nhdsWithin] with q hq hqs
     unfold topPenalty
     split_ifs with hqb
@@ -286,7 +286,7 @@ theorem isViscSubOn_topPenalty {Ω : Set (E d × ℝ)} (hΩ : IsOpen Ω) {b' η 
       linarith)
     linarith [hdt p hp]
   refine (IsViscSubOn.congr fun p hp ↦ ?_).1 h2
-  simp only [topPenalty, if_pos (hΩb p hp), hφdef, sub_eq_add_neg]
+  simp only [topPenalty, ite_eq_left (hΩb p hp), hφdef, sub_eq_add_neg]
 
 /-! ### The comparison theorem -/
 
@@ -333,7 +333,7 @@ theorem comparison_usc_lsc_source {V : Set (E d)} (hV : IsOpen V) (hVb : Bornolo
   set M : ℝ := max (wu pmax) (-K) with hM
   have hwvK : ∀ p ∈ Qc, -K < wv p := fun p hp ↦ by
     have := hpmin hp
-    simp only [mem_setOf_eq] at this
+    simp only [mem_ofPred_eq] at this
     linarith [neg_abs_le (wv pmin)]
   have hwuM : ∀ p ∈ Qc, wu p ≤ M := fun p hp ↦ (hpmax hp).trans (le_max_left _ _)
   have hKM : -K ≤ M := le_max_right _ _
@@ -373,7 +373,7 @@ theorem comparison_usc_lsc_source {V : Set (E d)} (hV : IsOpen V) (hVb : Bornolo
       (hwv_super.mono_set hQ'o hQ'sub) (fun p hp ↦ ?_)
     · -- `topPenalty ≤ M` on `Q'`
       unfold topPenalty
-      rw [if_pos hp.2.2]
+      rw [ite_eq_left hp.2.2]
       have : 0 ≤ η / (b' - p.2) := div_nonneg hη.le (sub_pos.2 hp.2.2).le
       linarith [hwuM p (hQsub (hQ'sub hp))]
     · -- the frontier
@@ -399,7 +399,7 @@ theorem comparison_usc_lsc_source {V : Set (E d)} (hV : IsOpen V) (hVb : Bornolo
   have hw : wu p₀ ≤ wv p₀ := by
     refine le_of_forall_pos_le_add fun ε hε ↦ ?_
     have := step3 b' hab' hb'b (ε * (b' - p₀.2)) (mul_pos hε hδ) p₀ hp₀'
-    simp only [topPenalty, if_pos hpb'] at this
+    simp only [topPenalty, ite_eq_left hpb'] at this
     rw [mul_div_assoc, div_self hδ.ne', mul_one] at this
     linarith
   exact le_of_mul_le_mul_left hw (Real.exp_pos _)

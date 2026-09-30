@@ -131,7 +131,7 @@ theorem IsViscSubOn.of_tendstoLocallyUniformlyOn {Ω : Set (E d × ℝ)} (hΩ : 
       refine ⟨hKΩ (hPK n), by ring, ?_⟩
       filter_upwards [nhdsWithin_le_nhds (isOpen_ball.mem_nhds hPn)] with q hq
       have := hPmax n hn (ball_subset_closedBall hq)
-      simp only [mem_setOf_eq] at this
+      simp only [mem_ofPred_eq] at this
       linarith
     have := hn.2 _ (hψ'c.add contDiff_const) (P n) (hKΩ (hPK n)) htouch
     rwa [dₜ_add_const, lapₓ_add_const] at this

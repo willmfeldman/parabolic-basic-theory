@@ -251,7 +251,7 @@ theorem IsViscSubOn.add_source {O : Set (E d × ℝ)} (hO : IsOpen O)
   have happrox : ∀ k, x k ∈ C → y k ∈ C →
       G (y k) ≤ S₁' (e.symm (x k)) + S₂' (e.symm (y k)) := by
     intro k hxC hyC
-    haveI : LocallyCompactSpace C := locallyCompactSpace_toPointSet Metric.isOpen_ball
+    have : LocallyCompactSpace C := locallyCompactSpace_toPointSet Metric.isOpen_ball
     have hloc : ViscositySolns.HasQuadraticPenaltyLocalMaximumOn C C U V (α k) (x k) (y k) :=
       ViscositySolns.hasQuadraticPenaltyLocalMaximumOn_of_isMaxOn_doubledObjective ⟨hxC, hyC⟩
         ((hqmax k).on_subset (prod_mono hCK hCK))

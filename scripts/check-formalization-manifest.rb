@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
-# Validate the public theorem inventory against Lean and the challenge configs.
+# Validate the public theorem inventory against Lean and the challenge configs, and the
+# toolchain, dependency, and Comparator tool pins against the files that use them.
 require 'yaml'
 require 'json'
 require 'open3'
@@ -57,6 +58,43 @@ targets.each do |target|
   lean_names << [target.fetch('declaration'), mod]
   target.fetch('related_declarations', []).each { |name| lean_names << [name, mod] }
 end
+# Toolchain, Mathlib, and dependency pins agree with lean-toolchain and lake-manifest.json, and
+# every challenge workspace uses the root toolchain and locks the root's git revisions.
+root_toolchain = File.read('lean-toolchain').strip
+git_packages = lambda do |file|
+  JSON.parse(File.read(file)).fetch('packages').select { |p| p['type'] == 'git' }
+      .to_h { |p| [p['name'], [p['rev'], p['inputRev']]] }
+end
+locked = git_packages.call('lake-manifest.json')
+failures << 'lean_toolchain differs from lean-toolchain' unless manifest['lean_toolchain'] == root_toolchain
+failures << 'mathlib differs from the locked Mathlib inputRev' unless manifest['mathlib'] == locked.fetch('mathlib')[1]
+manifest.fetch('dependencies').each do |dep|
+  rev, input_rev = locked.fetch(dep.fetch('name')) { [nil, nil] }
+  failures << "dependency #{dep['name']}: rev #{dep['rev'].inspect} differs from the locked inputRev" unless dep['rev'] == input_rev
+  failures << "dependency #{dep['name']}: commit differs from the locked rev" unless dep['commit'] == rev
+end
+workspace_configs.each do |config_path|
+  path = File.dirname(config_path)
+  toolchain = File.join(path, 'lean-toolchain')
+  failures << "#{path}: lean-toolchain differs from the root lean-toolchain" \
+    unless File.file?(toolchain) && File.read(toolchain).strip == root_toolchain
+  workspace_manifest = File.join(path, 'lake-manifest.json')
+  failures << "#{path}: lake-manifest.json locks different git revisions from the root" \
+    unless File.file?(workspace_manifest) && git_packages.call(workspace_manifest) == locked
+end
+
+# Comparator tool revisions agree with scripts/release-comparator.sh.
+tools = manifest.fetch('comparator')
+driver = File.read('scripts/release-comparator.sh')
+{ 'comparator_revision' => 'COMPARATOR_REV',
+  'lean4export_revision' => 'LEAN4EXPORT_REV',
+  'landrun_revision' => 'LANDRUN_REV' }.each do |key, var|
+  pinned = driver[/^#{var}=(\h+)$/, 1]
+  failures << "comparator.#{key} #{tools[key].inspect} differs from #{var} in scripts/release-comparator.sh" \
+    unless pinned && tools[key] == pinned
+end
+
+
 abort failures.join("\n") unless failures.empty?
 if metadata_only
   puts "Validated #{targets.length} targets (#{challenged.length - challenges.length} challenged) and #{challenges.length} supplemental challenge configs"

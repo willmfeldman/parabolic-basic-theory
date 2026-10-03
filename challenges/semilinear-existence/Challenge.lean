@@ -1,4 +1,13 @@
-import Challenge.Classical
+module
+
+-- challenge-prep: split vocabulary (aux proofs are shared only within a file, so the vocabulary
+-- follows the library's files)
+-- One module per restated library file. Lean reuses an auxiliary `_proof_k` constant only within a
+-- file, so merging the files would rename the auxiliary proofs that the library mints per module and
+-- the values would no longer match (`scripts/check-challenge-definitions.lean`).
+public import Vocabulary.Classical
+
+@[expose] public section
 
 /-!
 # Challenge: existence for the semilinear Cauchy–Dirichlet problem
@@ -10,8 +19,8 @@ Trusted statement surface for the existence theorem for
 Ladyzhenskaya–Solonnikov–Ural'tseva, *Linear and Quasi-linear Equations of Parabolic Type*,
 Ch. V]. The solution is continuous on `Ū × [0, ∞)` and classical `C^{2,1}` in `U × (0, ∞)`.
 
-All project vocabulary is restated inline in `Challenge/Setting.lean` and
-`Challenge/Classical.lean`, which import `Mathlib` only.
+All project vocabulary is restated inline in `Vocabulary/Setting.lean` and
+`Vocabulary/Classical.lean`, which import `Mathlib` only.
 -/
 
 open Set Filter Topology

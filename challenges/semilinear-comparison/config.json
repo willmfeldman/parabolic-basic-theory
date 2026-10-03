@@ -3,7 +3,8 @@
   "solution_module": "Solution",
   "theorem_names": [
     "ParabolicBasic.challenge_semilinear_comparison",
-    "ParabolicBasic.challenge_semilinear_unique"
+    "ParabolicBasic.challenge_semilinear_unique",
+    "ParabolicBasic.challenge_parBdry_ball_nonempty"
   ],
   "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
   "enable_nanoda": false

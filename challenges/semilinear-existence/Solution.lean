@@ -1,4 +1,8 @@
-import ParabolicBasic
+module
+
+public import ParabolicBasic
+
+@[expose] public section
 
 /-!
 # Solution: existence for the semilinear Cauchy–Dirichlet problem

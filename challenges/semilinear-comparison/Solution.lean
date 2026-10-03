@@ -1,10 +1,15 @@
-import ParabolicBasic.MainTheorems
+module
+
+public import ParabolicBasic.MainTheorems
+
+@[expose] public section
 
 /-!
 # Solution: comparison and uniqueness for the semilinear heat equation
 
 Discharges the challenge through the library theorems `ParabolicBasic.semilinear_comparison` and
-`ParabolicBasic.semilinear_unique`.
+`ParabolicBasic.semilinear_unique`. The sanity check `challenge_parBdry_ball_nonempty` unfolds
+`parBdry`.
 -/
 
 open Set Metric
@@ -35,5 +40,11 @@ theorem challenge_semilinear_unique {U : Set (E d)} {f : E d → ℝ → ℝ} {g
     (hu : IsSemilinearSolution U f g u) (hv : IsSemilinearSolution U f g v) :
     ∀ p ∈ closure U ×ˢ Ici (0 : ℝ), u p = v p :=
   semilinear_unique hU hUb hfx hfz hu hv
+
+theorem challenge_parBdry_ball_nonempty :
+    parBdry (ball (0 : E d) 1) 0 1 = closedBall 0 1 ×ˢ {0} ∪ sphere 0 1 ×ˢ Icc 0 1 ∧
+      (parBdry (ball (0 : E d) 1) 0 1).Nonempty := by
+  refine ⟨by rw [parBdry, closure_ball 0 one_ne_zero, frontier_ball 0 one_ne_zero], ?_⟩
+  exact ⟨((0 : E d), 0), Or.inl ⟨subset_closure (mem_ball_self one_pos), rfl⟩⟩
 
 end ParabolicBasic

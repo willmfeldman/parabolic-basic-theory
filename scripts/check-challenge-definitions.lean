@@ -3,28 +3,34 @@ Copyright (c) 2026 William M. Feldman. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: William M. Feldman
 -/
-import Lean
+module
+
+-- Standalone script, run with `lake env lean --run`; not part of any library.
+public import Lean
+
 open Lean
 
 /-! Local, non-sandboxed pre-check for the comparator challenges (not a substitute for Comparator).
 
-Usage, from inside a challenge workspace after `lake build Challenge Solution`:
+Usage, from inside a challenge workspace after `lake build Vocabulary Challenge Solution`:
 
     lake env lean --run ../../scripts/check-challenge-definitions.lean <theorem names from config.json>
 
-Exit code 0 and `result: MATCH` mean every definition restated in the `Challenge` modules and used by
-the listed theorems agrees with the library constant of the same name. -/
+Exit code 0 and `result: MATCH` mean every definition restated in the `Vocabulary` and `Challenge`
+modules and used by the listed theorems agrees with the library constant of the same name. -/
 
 /-- Local stand-in for Comparator's statement check: for each challenge theorem, walk the
 constants it depends on (through types, and through values of non-theorems) that come from
-`Challenge*` modules, and compare each with the Solution environment's constant of the same
-name (kind, universe params, type, and value for definitions). -/
+`Vocabulary*` or `Challenge*` modules, and compare each with the Solution environment's constant of
+the same name (kind, universe params, type, and value for definitions). -/
 def isChallengeMod (env : Environment) (n : Name) : Bool :=
   match env.getModuleIdxFor? n with
-  | some i => (`Challenge).isPrefixOf env.header.moduleNames[i.toNat]!
+  | some i =>
+    let m := env.header.moduleNames[i.toNat]!
+    (`Challenge).isPrefixOf m || (`Vocabulary).isPrefixOf m
   | none => true
 
-partial def main (args : List String) : IO UInt32 := do
+public partial def main (args : List String) : IO UInt32 := do
   initSearchPath (← findSysroot)
   let names := args.map String.toName
   let envC ← importModules #[{ module := `Challenge }] {}

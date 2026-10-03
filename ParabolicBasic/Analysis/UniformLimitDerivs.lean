@@ -76,7 +76,7 @@ private theorem tendstoLocallyUniformlyOn_linearIsometryEquiv {A : Type*} [Norme
     [NormedSpace ℝ A] [NormedSpace ℝ β] (e : A ≃ₗᵢ[ℝ] β) {Φ : ι → α → A} {Ψ : α → A}
     (h : TendstoLocallyUniformlyOn Φ Ψ l s) :
     TendstoLocallyUniformlyOn (fun n x ↦ e (Φ n x)) (fun x ↦ e (Ψ x)) l s :=
-  e.lipschitz.uniformContinuous.comp_tendstoLocallyUniformlyOn h
+  e.lipschitzWith.uniformContinuous.comp_tendstoLocallyUniformlyOn h
 
 end Aux
 
@@ -124,7 +124,7 @@ theorem contDiffOn_of_tendstoLocallyUniformlyOn_iteratedFDeriv
     let L := continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin (j + 1) ↦ V) F
     have hD : TendstoLocallyUniformlyOn (fun n x ↦ fderiv ℝ (iteratedFDeriv ℝ j (f n)) x)
         (fun x ↦ L (G x)) l s := by
-      refine (L.lipschitz.uniformContinuous.comp_tendstoLocallyUniformlyOn hG).congr
+      refine (L.lipschitzWith.uniformContinuous.comp_tendstoLocallyUniformlyOn hG).congr
         fun n x _ ↦ ?_
       simp [L, iteratedFDeriv_succ_eq_comp_left]
     have hder : ∀ x ∈ s, HasFDerivAt (iteratedFDeriv ℝ j g) (L (G x)) x := fun x hx ↦

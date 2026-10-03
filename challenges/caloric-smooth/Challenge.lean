@@ -1,4 +1,13 @@
-import Challenge.Viscosity
+module
+
+-- challenge-prep: split vocabulary (aux proofs are shared only within a file, so the vocabulary
+-- follows the library's files)
+-- One module per restated library file. Lean reuses an auxiliary `_proof_k` constant only within a
+-- file, so merging the files would rename the auxiliary proofs that the library mints per module and
+-- the values would no longer match (`scripts/check-challenge-definitions.lean`).
+public import Vocabulary.Viscosity
+
+@[expose] public section
 
 /-!
 # Challenge: viscosity solutions of the heat equation are smooth
@@ -9,8 +18,8 @@ and satisfies the equation classically. The library proves this by mollification
 interior derivative estimates for smooth caloric functions, and stability of viscosity solutions
 under local uniform limits.
 
-All project vocabulary is restated inline in `Challenge/Setting.lean` and
-`Challenge/Viscosity.lean`, which import `Mathlib` only. The conclusion is stated with Mathlib's
+All project vocabulary is restated inline in `Vocabulary/Setting.lean` and
+`Vocabulary/Viscosity.lean`, which import `Mathlib` only. The conclusion is stated with Mathlib's
 `ContDiffOn` and the slice derivatives `dₜ`, `lapₓ`, not through the library's
 `IsSmoothCaloricOn`.
 -/

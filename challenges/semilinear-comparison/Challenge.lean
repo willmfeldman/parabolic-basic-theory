@@ -1,6 +1,15 @@
-import Challenge.Parabolic
-import Challenge.Classical
-import Challenge.Viscosity
+module
+
+-- challenge-prep: split vocabulary (aux proofs are shared only within a file, so the vocabulary
+-- follows the library's files)
+-- One module per restated library file. Lean reuses an auxiliary `_proof_k` constant only within a
+-- file, so merging the files would rename the auxiliary proofs that the library mints per module and
+-- the values would no longer match (`scripts/check-challenge-definitions.lean`).
+public import Vocabulary.Parabolic
+public import Vocabulary.Classical
+public import Vocabulary.Viscosity
+
+@[expose] public section
 
 /-!
 # Challenge: comparison and uniqueness for the semilinear heat equation
@@ -8,16 +17,19 @@ import Challenge.Viscosity
 Trusted statement surface for the comparison principle for the semilinear equation
 `∂ₜu = Δₓu - f(x, u)` [Crandall–Ishii–Lions, *User's guide to viscosity solutions*, Thm 8.2] and
 its corollary, uniqueness for the Cauchy–Dirichlet problem. The project vocabulary is restated
-inline, token for token, in `Challenge/Setting.lean` (the space `E d` and the operators `gradₓ`,
-`lapₓ`, `dₜ`), `Challenge/Parabolic.lean` (`parBdry`), `Challenge/Touching.lean`,
-`Challenge/Classical.lean` (`IsC21On`, `IsSemilinearSolOn`, `IsSemilinearSolution`) and
-`Challenge/Viscosity.lean` (`IsSemilinearViscSubOn`, `IsSemilinearViscSuperOn`), which together
+inline, token for token, in `Vocabulary/Setting.lean` (the space `E d` and the operators `gradₓ`,
+`lapₓ`, `dₜ`), `Vocabulary/Parabolic.lean` (`parBdry`), `Vocabulary/Touching.lean`,
+`Vocabulary/Classical.lean` (`IsC21On`, `IsSemilinearSolOn`, `IsSemilinearSolution`) and
+`Vocabulary/Viscosity.lean` (`IsSemilinearViscSubOn`, `IsSemilinearViscSuperOn`), which together
 import `Mathlib` only. The files follow the library's file boundaries, which Comparator needs
 (see the README).
 
 The hypotheses on `f` are spelled out: Hölder continuity in `x` uniformly in `z` (`hfx`) and
 Lipschitz continuity in `z` uniformly in `x` (`hfz`), on the closure of the domain. This is less
 general than the "continuous in `x` uniformly in `z`" condition of [CIL, §3, §8].
+
+The last statement, `challenge_parBdry_ball_nonempty`, is a sanity check on `parBdry`, not a
+headline result: it computes the parabolic boundary of a ball cylinder.
 -/
 
 open Set Metric
@@ -67,6 +79,16 @@ theorem challenge_semilinear_unique {U : Set (E d)} {f : E d → ℝ → ℝ} {g
     (hfz : ∃ L : ℝ, ∀ x ∈ closure U, ∀ z w, |f x z - f x w| ≤ L * |z - w|)
     (hu : IsSemilinearSolution U f g u) (hv : IsSemilinearSolution U f g v) :
     ∀ p ∈ closure U ×ˢ Ici (0 : ℝ), u p = v p := by
+  sorry
+
+/-- **Parabolic boundary of a ball cylinder (a non-vacuity check, not a headline result).** In
+`ℝᵈ × ℝ`, the parabolic boundary of `B₁(0) × (0, 1]` is the classical set
+`(B̄₁(0) × {0}) ∪ (∂B₁(0) × [0, 1])`, and it is nonempty, so the boundary hypotheses of the
+theorems above constrain something. (For `d = 0` the sphere is empty and only the initial face
+remains.) -/
+theorem challenge_parBdry_ball_nonempty :
+    parBdry (ball (0 : E d) 1) 0 1 = closedBall 0 1 ×ˢ {0} ∪ sphere 0 1 ×ˢ Icc 0 1 ∧
+      (parBdry (ball (0 : E d) 1) 0 1).Nonempty := by
   sorry
 
 end ParabolicBasic

@@ -4,21 +4,21 @@ description: >
   semilinear heat equations on R^d x R: comparison for viscosity solutions,
   parabolic Perron existence, regularity of viscosity caloric functions,
   interior Schauder estimates, and the semilinear Cauchy-Dirichlet problem.
-lean_toolchain: leanprover/lean4:v4.34.1
-mathlib: v4.34.1
+lean_toolchain: leanprover/lean4:v4.35.0-rc3
+mathlib: v4.35.0-rc3
 dependencies:
   - name: viscosity_solns
     url: https://github.com/willmfeldman/viscosity-solution-theory
-    rev: v0.3.0
-    commit: 067e2540ad1594408c0b6145c5bde01b4d5791a9
+    rev: v0.4.0
+    commit: b9dc82d59e19c5689b6669b41e0c59168c1cdc84
   - name: AleksandrovDifferentiability
     url: https://github.com/willmfeldman/aleksandrov-differentiability
-    rev: v0.3.0
-    commit: 6b318246f170ac472de4728e22f95a2adae420a5
+    rev: v0.4.0
+    commit: 5e5c2ec4cee4f8851387e9bb309eeb703cd72a25
 # Comparator tool revisions pinned in scripts/release-comparator.sh.
 comparator:
-  comparator_revision: 575674928e239f5bc452aab72d1dd7b0f1326494
-  lean4export_revision: 076e8e57707e813375e8f9da8bf989799ace9680
+  comparator_revision: fd5d5bcf14177b187f66d4502071268d877887c3
+  lean4export_revision: 66f1fb4bc256072069767fce52d39480e4524869
   landrun_revision: 811cfff51ceaf3d9843708aa6d22e9b84ccac8b4
 permitted_axioms: [propext, Quot.sound, Classical.choice]
 automation:
@@ -64,6 +64,8 @@ targets:
     challenge_theorems:
       - ParabolicBasic.challenge_semilinear_comparison
       - ParabolicBasic.challenge_semilinear_unique
+      # Non-vacuity check on `parBdry`, not a headline result.
+      - ParabolicBasic.challenge_parBdry_ball_nonempty
   - id: classical-viscosity
     kind: headline-theorem
     expected_axioms: [propext, Quot.sound, Classical.choice]
@@ -81,6 +83,10 @@ targets:
     challenge_theorems:
       - ParabolicBasic.challenge_classical_viscSub
       - ParabolicBasic.challenge_classical_viscSuper
+      # Sign-convention and non-vacuity checks on the definitions, not headline results.
+      - ParabolicBasic.challenge_time_not_viscSub
+      - ParabolicBasic.challenge_time_viscSuper
+      - ParabolicBasic.challenge_caloric_quadratic_solOn
   - id: semilinear-existence
     kind: headline-theorem
     expected_axioms: [propext, Quot.sound, Classical.choice]
@@ -154,12 +160,3 @@ targets:
       is a viscosity solution attaining the boundary data. The hypothesis is
       discharged in caloric_dirichlet_ball and semilinear_exists, so this
       target has no challenge of its own.
-supplemental_challenges:
-  - id: model-sanity
-    title: Sign convention, non-vacuity and parabolic boundary model cases
-    challenge: challenges/model-sanity
-    challenge_theorems:
-      - ParabolicBasic.challenge_time_not_viscSub
-      - ParabolicBasic.challenge_time_viscSuper
-      - ParabolicBasic.challenge_caloric_quadratic_solOn
-      - ParabolicBasic.challenge_parBdry_ball_nonempty

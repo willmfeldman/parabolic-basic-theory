@@ -1,6 +1,15 @@
-import Challenge.Classical
-import Challenge.Viscosity
-import Challenge.Holder
+module
+
+-- challenge-prep: split vocabulary (aux proofs are shared only within a file, so the vocabulary
+-- follows the library's files)
+-- One module per restated library file. Lean reuses an auxiliary `_proof_k` constant only within a
+-- file, so merging the files would rename the auxiliary proofs that the library mints per module and
+-- the values would no longer match (`scripts/check-challenge-definitions.lean`).
+public import Vocabulary.Classical
+public import Vocabulary.Viscosity
+public import Vocabulary.Holder
+
+@[expose] public section
 
 /-!
 # Challenge: interior Schauder regularity for the heat equation
@@ -18,8 +27,8 @@ Hölder continuity is measured in the parabolic metric
 time, matching the scaling `(x, t) ↦ (r x, r² t)` of the heat equation. It is a plain function:
 `E d × ℝ` keeps Mathlib's sup metric.
 
-All project vocabulary is restated inline in `Challenge/Setting.lean`,
-`Challenge/Classical.lean`, `Challenge/Viscosity.lean` and `Challenge/Holder.lean`, which import
+All project vocabulary is restated inline in `Vocabulary/Setting.lean`,
+`Vocabulary/Classical.lean`, `Vocabulary/Viscosity.lean` and `Vocabulary/Holder.lean`, which import
 `Mathlib` only.
 -/
 

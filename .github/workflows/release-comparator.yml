@@ -48,14 +48,14 @@ jobs:
       - name: Install pinned Comparator tools
         run: bash scripts/release-comparator.sh install
       # Lake writes `.hash` files the first time it replays some downloaded Mathlib artifacts,
-      # which the sandbox cannot do. Building the trusted Challenge targets (with their vocabulary
-      # files Challenge/*.lean) here writes them first. Solution files are built only inside the
-      # sandbox.
+      # which the sandbox cannot do. Building the trusted Challenge targets (and the Mathlib-only
+      # Vocabulary modules, if any) here writes them first. Solution files are built only inside
+      # the sandbox.
       - name: Build trusted Challenge targets outside the sandbox
         run: |
           for workspace in challenges/*/; do
             echo "==> ${workspace}Challenge"
-            (cd "$workspace" && lake build Challenge)   # PARAM: `Statement Challenge` if workspaces have Statement.lean
+            (cd "$workspace" && lake build Vocabulary Challenge)   # PARAM: `Vocabulary Challenge` (v1.4 Vocabulary modules)
           done
       - name: Run Comparator on every challenge
         run: bash scripts/release-comparator.sh run

@@ -7,7 +7,7 @@ authors:
     given-names: William M.
 repository-code: "https://github.com/willmfeldman/parabolic-basic-theory"
 license: Apache-2.0
-version: 0.2.0
+version: 0.3.0
 abstract: >-
   A Lean 4 formalization of the basic theory of the heat operator and of
   semilinear heat equations: comparison for viscosity solutions, parabolic

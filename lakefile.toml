@@ -1,5 +1,5 @@
 name = "parabolic_basic_theory"
-version = "0.2.0"
+version = "0.3.0"
 description = "Lean 4 formalization of basic theory for the heat operator and semilinear heat equations on E d × ℝ: comparison, Perron existence, regularity of viscosity solutions, interior Schauder theory (L^∞ Campanato iteration), and the semilinear Cauchy–Dirichlet problem"
 keywords = ["math"]
 defaultTargets = ["ParabolicBasic"]
@@ -15,12 +15,12 @@ maxSynthPendingDepth = 3
 [[require]]
 name = "mathlib"
 scope = "leanprover-community"
-rev = "v4.34.1"
+rev = "v4.35.0-rc3"
 
 [[require]]
 name = "viscosity_solns"
 git = "https://github.com/willmfeldman/viscosity-solution-theory"
-rev = "v0.3.0"
+rev = "v0.4.0"
 
 [[lean_lib]]
 name = "ParabolicBasic"

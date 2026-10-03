@@ -254,7 +254,7 @@ theorem IsViscSubOn.add_source {O : Set (E d × ℝ)} (hO : IsOpen O)
     have : LocallyCompactSpace C := locallyCompactSpace_toPointSet Metric.isOpen_ball
     have hloc : ViscositySolns.HasQuadraticPenaltyLocalMaximumOn C C U V (α k) (x k) (y k) :=
       ViscositySolns.hasQuadraticPenaltyLocalMaximumOn_of_isMaxOn_doubledObjective ⟨hxC, hyC⟩
-        ((hqmax k).on_subset (prod_mono hCK hCK))
+        ((hqmax k).of_subset (prod_mono hCK hCK))
     obtain ⟨J⟩ := ViscositySolns.QuadraticPenaltyIshiiLemmaOn.of_aleksandrov
       (ViscositySolns.AleksandrovSecondDifferentiabilityByJetsOnClosedBallTheorem.proof_external _)
       (hUK.mono hCK) (hVK.mono hCK) (α k) (hαpos k) (x k) (y k) hloc

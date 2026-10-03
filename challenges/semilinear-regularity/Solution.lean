@@ -1,4 +1,8 @@
-import ParabolicBasic
+module
+
+public import ParabolicBasic
+
+@[expose] public section
 
 /-!
 # Solution: regularity for the semilinear heat equation

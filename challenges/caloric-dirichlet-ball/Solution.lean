@@ -1,4 +1,8 @@
-import ParabolicBasic.MainTheorems
+module
+
+public import ParabolicBasic.MainTheorems
+
+@[expose] public section
 
 /-!
 # Solution: the Dirichlet problem for the heat equation on a ball cylinder

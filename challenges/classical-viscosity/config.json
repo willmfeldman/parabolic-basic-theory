@@ -3,7 +3,10 @@
   "solution_module": "Solution",
   "theorem_names": [
     "ParabolicBasic.challenge_classical_viscSub",
-    "ParabolicBasic.challenge_classical_viscSuper"
+    "ParabolicBasic.challenge_classical_viscSuper",
+    "ParabolicBasic.challenge_time_not_viscSub",
+    "ParabolicBasic.challenge_time_viscSuper",
+    "ParabolicBasic.challenge_caloric_quadratic_solOn"
   ],
   "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
   "enable_nanoda": false

@@ -9,9 +9,9 @@ set -euo pipefail
 # Immutable upstream source revisions. lean4export is built with this repository's exact
 # lean-toolchain, since its olean reader must match the challenge toolchain. These revisions are
 # also recorded in formalization.yaml (checked by scripts/check-formalization-manifest.rb).
-COMPARATOR_REV=575674928e239f5bc452aab72d1dd7b0f1326494
+COMPARATOR_REV=fd5d5bcf14177b187f66d4502071268d877887c3
 LANDRUN_REV=811cfff51ceaf3d9843708aa6d22e9b84ccac8b4
-LEAN4EXPORT_REV=076e8e57707e813375e8f9da8bf989799ace9680
+LEAN4EXPORT_REV=66f1fb4bc256072069767fce52d39480e4524869
 ROOT=$(git rev-parse --show-toplevel)
 TOOLS="${RUNNER_TEMP:-/tmp}/comparator-tools"
 REPORT="$ROOT/comparator-report"

@@ -10,6 +10,9 @@ require 'pathname'
 ROOT = Pathname.new(__dir__).parent
 # Lean identifiers may contain Unicode letters and subscripts (e.g. `gradₓ`).
 LEAN_NAME = /\A[\p{L}_][\p{L}\p{N}_'!?]*(?:\.[\p{L}_][\p{L}\p{N}_'!?]*)*\z/
+# Import lines, including module-system `public`/`meta` imports.
+IMPORT_LINE = /\A\s*(?:public\s+)?(?:meta\s+)?import\s+([\p{L}_][\p{L}\p{N}_.']*)\s*\z/
+IMPORT_ROOTS = %w[Init Std Lean Mathlib].freeze
 metadata_only = ARGV == ['--metadata-only']
 abort 'usage: check-formalization-manifest.rb [--metadata-only]' unless ARGV.empty? || metadata_only
 Dir.chdir(ROOT)
@@ -37,9 +40,21 @@ challenged.each do |entry|
   abort "missing #{config_path}" unless File.file?(config_path)
   config = JSON.parse(File.read(config_path))
   expected = entry.fetch('challenge_theorems')
-  failures << "#{path}: missing Challenge.lean" unless File.file?(File.join(path, 'Challenge.lean'))
-  failures << "#{path}: missing Solution.lean" unless File.file?(File.join(path, 'Solution.lean'))
-  failures << "#{path}: missing lakefile.toml" unless File.file?(File.join(path, 'lakefile.toml'))
+  %w[Vocabulary.lean Challenge.lean Solution.lean lakefile.toml].each do |file|
+    failures << "#{path}: missing #{file}" unless File.file?(File.join(path, file))
+  end
+  failures << "#{path}: old Challenge/ vocabulary directory (use Vocabulary/)" if File.directory?(File.join(path, 'Challenge'))
+  # The vocabulary imports only Lean core/Mathlib and its own `Vocabulary.*` modules; `Challenge.lean`
+  # may also import its own `Vocabulary.*` modules (split mode). `challenge-prep.py check` covers the rest.
+  vocab_files = [File.join(path, 'Vocabulary.lean')] + Dir.glob(File.join(path, 'Vocabulary', '**', '*.lean'))
+  (vocab_files + [File.join(path, 'Challenge.lean')]).select { |f| File.file?(f) }.each do |file|
+    File.foreach(file) do |line|
+      mod = line[IMPORT_LINE, 1] or next
+      own = mod == 'Vocabulary' || mod.start_with?('Vocabulary.')
+      failures << "#{file}: import #{mod} is neither Lean core/Mathlib nor this workspace's vocabulary" \
+        unless own || IMPORT_ROOTS.include?(mod.split('.').first)
+    end
+  end
   failures << "#{path}: challenge_theorems must be a nonempty list" unless expected.is_a?(Array) && !expected.empty?
   failures << "#{path}: theorem_names differ from manifest" unless config.fetch('theorem_names') == expected
   failures << "#{path}: permitted_axioms differ from manifest" unless config.fetch('permitted_axioms').sort == allowed.sort

@@ -60,15 +60,15 @@ lake build
 
 ## Dependencies
 
-- [Mathlib](https://github.com/leanprover-community/mathlib4) `v4.34.1`.
+- [Mathlib](https://github.com/leanprover-community/mathlib4) `v4.35.0-rc3`.
 - [viscosity-solution-theory](https://github.com/willmfeldman/viscosity-solution-theory)
-  [`v0.3.0`](https://github.com/willmfeldman/viscosity-solution-theory/releases/tag/v0.3.0)
+  [`v0.4.0`](https://github.com/willmfeldman/viscosity-solution-theory/releases/tag/v0.4.0)
   (library `ViscositySolns`). It supplies the elliptic Crandall–Ishii–Lions
   theory: the Crandall–Ishii lemma and the strict comparison theorem, applied
   to the heat operator through the linear isomorphism `E d × ℝ ≃ ℝᵈ⁺¹`
   (`ParabolicBasic/Transport/`). Its Perron existence theorem is not used.
 - [aleksandrov-differentiability](https://github.com/willmfeldman/aleksandrov-differentiability)
-  [`v0.3.0`](https://github.com/willmfeldman/aleksandrov-differentiability/releases/tag/v0.3.0),
+  [`v0.4.0`](https://github.com/willmfeldman/aleksandrov-differentiability/releases/tag/v0.4.0),
   a dependency of `ViscositySolns`.
 
 ## Layout
@@ -112,5 +112,8 @@ lake build
 The project is released under the [Apache License 2.0](LICENSE). If you use
 this work, please cite it using [CITATION.cff](CITATION.cff).
 
-The Lean code was developed with AI coding agents under human direction and
-review; see `automation` in [formalization.yaml](formalization.yaml).
+The Lean proofs were written by AI coding agents (Claude, by Anthropic) under
+the author's mathematical direction and review. The theorem statements and
+proof routes were reviewed by the author. Correctness rests on Lean's kernel
+check, together with the comparator challenges in `challenges/`. See
+`automation` in [formalization.yaml](formalization.yaml).

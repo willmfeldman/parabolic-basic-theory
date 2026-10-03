@@ -1,4 +1,8 @@
-import ParabolicBasic
+module
+
+public import ParabolicBasic
+
+@[expose] public section
 
 /-!
 # Solution: interior Schauder regularity for the heat equation

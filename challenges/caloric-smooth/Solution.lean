@@ -1,4 +1,8 @@
-import ParabolicBasic
+module
+
+public import ParabolicBasic
+
+@[expose] public section
 
 /-!
 # Solution: viscosity solutions of the heat equation are smooth

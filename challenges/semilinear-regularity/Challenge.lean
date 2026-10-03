@@ -1,4 +1,13 @@
-import Challenge.Classical
+module
+
+-- challenge-prep: split vocabulary (aux proofs are shared only within a file, so the vocabulary
+-- follows the library's files)
+-- One module per restated library file. Lean reuses an auxiliary `_proof_k` constant only within a
+-- file, so merging the files would rename the auxiliary proofs that the library mints per module and
+-- the values would no longer match (`scripts/check-challenge-definitions.lean`).
+public import Vocabulary.Classical
+
+@[expose] public section
 
 /-!
 # Challenge: regularity for the semilinear heat equation
@@ -11,8 +20,8 @@ Trusted statement surface for two regularity results for `∂ₜu = Δₓu - f(x
   with `C²` data, continuity of the spatial gradient up to the initial time `t = 0` in the
   interior of the domain (barrier argument).
 
-All project vocabulary is restated inline in `Challenge/Setting.lean` and
-`Challenge/Classical.lean`, which import `Mathlib` only. The conclusions are stated with
+All project vocabulary is restated inline in `Vocabulary/Setting.lean` and
+`Vocabulary/Classical.lean`, which import `Mathlib` only. The conclusions are stated with
 Mathlib's `ContDiffOn` and `ContinuousOn`; `gradₓ u (x, t)` is Mathlib's `gradient` of the
 time slice `y ↦ u (y, t)`.
 -/

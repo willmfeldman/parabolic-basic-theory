@@ -18,7 +18,7 @@ converge locally uniformly, then `g` is `Cᵏ` and its derivatives are the limit
   `iteratedFDeriv`;
 * `contDiffOn_of_tendstoLocallyUniformlyOn_partials` (and `…_infty_…`): scalar functions on
   `E d × ℝ`, with coordinate partials `iterPartial w`;
-* `contDiffOn_of_uniformCauchySeqOn_partials` (and `…_infty_…`): the Cauchy variant, with no
+* `contDiffOn_infty_of_uniformCauchySeqOn_partials`: the Cauchy variant, with no
   a-priori limits of the partials (the form produced by bounds on differences).
 
 All statements are for an arbitrary filter `l` with `l.NeBot` (e.g. `atTop` on `ℕ`).
@@ -30,7 +30,6 @@ open Set Filter Topology
 open scoped ContDiff
 
 namespace ParabolicBasic
-
 
 /-! ### Auxiliary facts on locally uniform convergence -/
 
@@ -226,19 +225,7 @@ theorem contDiffOn_infty_of_tendstoLocallyUniformlyOn_partials (hs : IsOpen s)
       fun w _ ↦ hconv w
   exact ⟨contDiffOn_infty.2 fun k ↦ (H k).1, fun w ↦ (H w.length).2 w le_rfl⟩
 
-/-- Cauchy variant: locally uniformly Cauchy partials of order `≤ k`
-(and pointwise convergence of `fₙ`) suffice. -/
-theorem contDiffOn_of_uniformCauchySeqOn_partials (hs : IsOpen s) {k : ℕ}
-    (hf : ∀ n, ContDiffOn ℝ k (f n) s) (hfg : ∀ x ∈ s, Tendsto (fun n ↦ f n x) l (𝓝 (g x)))
-    (hcauchy : ∀ w : List (Fin (d + 1)), w.length ≤ k →
-      ∀ x ∈ s, ∃ u ∈ 𝓝 x, UniformCauchySeqOn (fun n ↦ iterPartial w (f n)) l u) :
-    ContDiffOn ℝ k g s ∧
-      ∀ w : List (Fin (d + 1)), w.length ≤ k →
-        TendstoLocallyUniformlyOn (fun n ↦ iterPartial w (f n)) (iterPartial w g) l s :=
-  contDiffOn_of_tendstoLocallyUniformlyOn_partials hs hf hfg fun w hw ↦
-    ⟨_, tendstoLocallyUniformlyOn_limUnder_of_uniformCauchySeqOn (hcauchy w hw)⟩
-
-/-- The `C^∞` version of `contDiffOn_of_uniformCauchySeqOn_partials`. -/
+/-- The `C^∞` Cauchy variant of `contDiffOn_infty_of_tendstoLocallyUniformlyOn_partials`. -/
 theorem contDiffOn_infty_of_uniformCauchySeqOn_partials (hs : IsOpen s)
     (hf : ∀ n, ContDiffOn ℝ ∞ (f n) s) (hfg : ∀ x ∈ s, Tendsto (fun n ↦ f n x) l (𝓝 (g x)))
     (hcauchy : ∀ w : List (Fin (d + 1)),

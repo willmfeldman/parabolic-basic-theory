@@ -12,9 +12,7 @@ public import ParabolicBasic.Analysis.UniformLimitDerivs
 # Locally uniform limits of smooth caloric functions
 
 * `IsSmoothCaloricOn.of_tendstoLocallyUniformlyOn`: if `vₙ` are smooth caloric on an open `O` and
-  `vₙ → u` locally uniformly on `O`, then `u` is smooth caloric on `O`;
-* `IsSmoothCaloricOn.tendstoLocallyUniformlyOn_iterPartial`: moreover `∂^w vₙ → ∂^w u` locally
-  uniformly on `O`, for every word `w`.
+  `vₙ → u` locally uniformly on `O`, then `u` is smooth caloric on `O`.
 
 Proof: around `p ∈ O` take a sup-ball `N = B(p, r)` with `K' = B̄(p, 2r) ⊆ O` containing
 `closedParCyl q r` for all `q ∈ N`. `vₙ - vₘ` is smooth caloric, so Bernstein's bounds of all
@@ -124,14 +122,5 @@ theorem IsSmoothCaloricOn.of_tendstoLocallyUniformlyOn {ι : Type*} {l : Filter 
   have := tendsto_nhds_unique h1 h2
   simp only [iterPartial_cons, iterPartial_nil] at this
   simp only [heatP, this, sub_self]
-
-/-- For a locally uniform limit of smooth caloric functions, `∂^w vₙ → ∂^w u` locally
-uniformly. -/
-theorem IsSmoothCaloricOn.tendstoLocallyUniformlyOn_iterPartial {ι : Type*} {l : Filter ι}
-    [l.NeBot] {O : Set (E d × ℝ)} (hO : IsOpen O) {v : ι → E d × ℝ → ℝ} {u : E d × ℝ → ℝ}
-    (hv : ∀ n, IsSmoothCaloricOn O (v n)) (hlim : TendstoLocallyUniformlyOn v u l O)
-    (w : List (Fin (d + 1))) :
-    TendstoLocallyUniformlyOn (fun n ↦ iterPartial w (v n)) (iterPartial w u) l O :=
-  (IsSmoothCaloricOn.contDiffOn_and_tendstoLocallyUniformlyOn_iterPartial hO hv hlim).2 w
 
 end ParabolicBasic

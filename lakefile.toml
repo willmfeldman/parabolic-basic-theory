@@ -1,5 +1,5 @@
 name = "parabolic_basic_theory"
-version = "0.3.0"
+version = "0.3.1"
 description = "Lean 4 formalization of basic theory for the heat operator and semilinear heat equations on E d × ℝ: comparison, Perron existence, regularity of viscosity solutions, interior Schauder theory (L^∞ Campanato iteration), and the semilinear Cauchy–Dirichlet problem"
 keywords = ["math"]
 defaultTargets = ["ParabolicBasic"]

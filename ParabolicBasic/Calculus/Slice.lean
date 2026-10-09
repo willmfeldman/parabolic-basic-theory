@@ -18,7 +18,7 @@ For a space-time function `φ : E d × ℝ → ℝ`:
   global `Cⁿ` function (product with a smooth bump), for any `n : ℕ∞`, with a version for any
   space with smooth bumps (`exists_contDiff_eventuallyEq_of_contDiffOn`) and a pointwise version
   (`ContDiffAt.exists_contDiff_eventuallyEq`);
-* `dₜ_congr_nhds`, `lapₓ_congr_nhds`, `gradₓ_congr_nhds`: the operators depend only on the germ;
+* `dₜ_congr_nhds`, `lapₓ_congr_nhds`: the operators depend only on the germ;
 * formulas in terms of Fréchet derivatives (`dₜ_eq_fderiv`, `gradₓ_eq_fderiv`,
   `lapₓ_eq_iteratedFDeriv`) and continuity (`continuous_dₜ`, `continuous_gradₓ`,
   `continuous_lapₓ`);
@@ -112,10 +112,6 @@ theorem dₜ_congr_nhds (h : φ =ᶠ[𝓝 p] ψ) : dₜ φ p = dₜ ψ p :=
 /-- `lapₓ` depends only on the germ. -/
 theorem lapₓ_congr_nhds (h : φ =ᶠ[𝓝 p] ψ) : lapₓ φ p = lapₓ ψ p :=
   (InnerProductSpace.laplacian_congr_nhds (eventuallyEq_sliceX h)).eq_of_nhds
-
-/-- `gradₓ` depends only on the germ. -/
-theorem gradₓ_congr_nhds (h : φ =ᶠ[𝓝 p] ψ) : gradₓ φ p = gradₓ ψ p := by
-  simp only [gradₓ, gradient, (eventuallyEq_sliceX h).fderiv_eq]
 
 end Congr
 

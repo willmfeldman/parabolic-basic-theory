@@ -96,13 +96,6 @@ theorem lowerEnv_le (hlo : ∀ q ∈ S, m ≤ W q) (hz : z ∈ S) : lowerEnv S W
   unfold lowerEnv
   linarith
 
-theorem le_lowerEnv_of_eventually (hz : z ∈ closure S) (hup : ∀ q ∈ S, W q ≤ M) {y : ℝ}
-    (h : ∀ᶠ q in 𝓝[S] z, y ≤ W q) : y ≤ lowerEnv S W z := by
-  have := upperEnv_le_of_eventually (W := fun q ↦ -W q) (m := -M) (y := -y) hz
-    (fun q hq ↦ neg_le_neg (hup q hq)) (h.mono fun q hq ↦ neg_le_neg hq)
-  unfold lowerEnv
-  linarith
-
 theorem frequently_lt_of_lowerEnv_lt (hz : z ∈ closure S) (hup : ∀ q ∈ S, W q ≤ M) {y : ℝ}
     (h : lowerEnv S W z < y) : ∃ᶠ q in 𝓝[S] z, W q < y := by
   have := frequently_lt_of_lt_upperEnv (W := fun q ↦ -W q) (m := -M) (y := -y) hz

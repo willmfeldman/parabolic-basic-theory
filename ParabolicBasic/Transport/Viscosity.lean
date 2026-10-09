@@ -164,18 +164,4 @@ theorem IsViscSubOn.closedSuperjet_le {Ω : Set (E d × ℝ)} {F : E d × ℝ �
   change _ + _ + F _ (u ((spaceTimeEquiv d).symm z)) ≤ 0 at h
   linarith
 
-/-- Supersolution mirror: the closed-subjet inequality. -/
-theorem IsViscSuperOn.closedSubjet_nonneg {Ω : Set (E d × ℝ)} {F : E d × ℝ → ℝ → ℝ}
-    {u : E d × ℝ → ℝ} (hu : IsViscSuperOn Ω F u)
-    (hF : Continuous fun q : (E d × ℝ) × ℝ ↦ F q.1 q.2) {z : ViscositySolns.Point (d + 1)}
-    {J : ViscositySolns.Jet (d + 1)}
-    (hJ : J ∈ ViscositySolns.ClosedSubjet (toPointSet Ω) (toPointFun u) z) :
-    0 ≤ J.gradient (Fin.last d) - ∑ i : Fin d, J.hessian i.castSucc i.castSucc
-      + F ((spaceTimeEquiv d).symm z) (u ((spaceTimeEquiv d).symm z)) := by
-  have h := hu.toViscositySupersolution.closedSubjet_nonneg_of_operatorContinuous
-    (parabolicOp_operatorContinuous hF) hJ
-  rw [parabolicOp_apply] at h
-  change 0 ≤ _ + _ + F _ (u ((spaceTimeEquiv d).symm z)) at h
-  linarith
-
 end ParabolicBasic

@@ -171,12 +171,6 @@ theorem partialDeriv_castSucc_eq_gradₓ (hf : DifferentiableAt ℝ f p) (i : Fi
   simp only [map_one, one_mul] at h2
   simp [gradₓ, gradient, h1.fderiv, h2, partialDeriv]
 
-/-- The spatial gradient in coordinates (`f` only differentiable at `p`). -/
-theorem gradₓ_eq_sum_partialDeriv (hf : DifferentiableAt ℝ f p) :
-    gradₓ f p = ∑ i : Fin d, partialDeriv i.castSucc f p • EuclideanSpace.single i (1 : ℝ) := by
-  ext j
-  simp [partialDeriv_castSucc_eq_gradₓ hf, WithLp.ofLp_sum, Pi.single_apply]
-
 /-- The `k`-th spatial derivative of the slice through `p` is the restriction of the joint `k`-th
 derivative to spatial directions (`f` `Cᵏ` at `p`). -/
 theorem iteratedFDeriv_sliceX_eq {k : ℕ} (hf : ContDiffAt ℝ k f p) :
@@ -244,16 +238,6 @@ set containing `p`). -/
 theorem lapₓ_eq_sum_partialDeriv (hs : IsOpen s) (hf : ContDiffOn ℝ 2 f s) (hp : p ∈ s) :
     lapₓ f p = ∑ i : Fin d, partialDeriv i.castSucc (partialDeriv i.castSucc f) p :=
   lapₓ_eq_sum_partialDeriv_of_contDiffAt (hf.contDiffAt (hs.mem_nhds hp))
-
-/-- Spatial slices of `Cⁿ` functions are `Cⁿ`. -/
-theorem contDiffOn_sliceX {n : WithTop ℕ∞} (hf : ContDiffOn ℝ n f s) (t : ℝ) :
-    ContDiffOn ℝ n (fun y : E d ↦ f (y, t)) {y | (y, t) ∈ s} :=
-  hf.comp (contDiffOn_id.prodMk contDiffOn_const) fun _ hy ↦ hy
-
-/-- Time slices of `Cⁿ` functions are `Cⁿ`. -/
-theorem contDiffOn_sliceT {n : WithTop ℕ∞} (hf : ContDiffOn ℝ n f s) (x : E d) :
-    ContDiffOn ℝ n (fun t : ℝ ↦ f (x, t)) {t | (x, t) ∈ s} :=
-  hf.comp (contDiffOn_const.prodMk contDiffOn_id) fun _ ht ↦ ht
 
 /-- The spatial `k`-th derivative of the slices is jointly continuous on an open set where `f` is
 `Cᵏ` (the continuity field of `IsSemilinearSolOn` for `k = 2`). -/

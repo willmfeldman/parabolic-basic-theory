@@ -31,12 +31,6 @@ theorem contDiff_toPointFun_iff {n : WithTop ℕ∞} {ψ : E d × ℝ → ℝ} :
     ContDiff ℝ n (toPointFun ψ) ↔ ContDiff ℝ n ψ :=
   (spaceTimeEquiv d).symm.contDiff_comp_iff
 
-/-- `ψ♯ ∘ e = ψ`. -/
-theorem toPointFun_comp_spaceTimeEquiv (ψ : E d × ℝ → ℝ) :
-    toPointFun ψ ∘ spaceTimeEquiv d = ψ := by
-  funext p; simp only [Function.comp_apply,
-    ContinuousLinearEquiv.symm_apply_apply]
-
 /-- **Time derivative**: `dₜ ψ p = Dψ♯(e p)[ε_t]`. -/
 theorem dₜ_eq_fderiv_toPointFun {ψ : E d × ℝ → ℝ} (hψ : ContDiff ℝ 1 ψ) (p : E d × ℝ) :
     dₜ ψ p = fderiv ℝ (toPointFun ψ) (spaceTimeEquiv d p)

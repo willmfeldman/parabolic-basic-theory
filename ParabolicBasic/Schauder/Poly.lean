@@ -185,9 +185,6 @@ instance : SMul ℝ (CaloricPoly d) := ⟨fun r P ↦ ⟨r * P.a, r • P.b, r *
 theorem src_add (P Q : CaloricPoly d) : (P + Q).src = P.src + Q.src := by
   simp only [src, add_c, add_M, Matrix.trace_add]; ring
 
-theorem src_sub (P Q : CaloricPoly d) : (P - Q).src = P.src - Q.src := by
-  simp only [src, sub_c, sub_M, Matrix.trace_sub]; ring
-
 @[simp] theorem src_zero : (0 : CaloricPoly d).src = 0 := by
   simp [src]
 
@@ -207,8 +204,6 @@ theorem coeffNorm_add_le (P Q : CaloricPoly d) : (P + Q).coeffNorm ≤ P.coeffNo
   linarith
 
 /-! ### Degree -/
-
-theorem isDegLE_two_add (P : CaloricPoly d) (k : ℕ) : P.IsDegLE (k + 2) := trivial
 
 theorem IsDegLE.mono {P : CaloricPoly d} {k l : ℕ} (h : P.IsDegLE k) (hkl : k ≤ l) :
     P.IsDegLE l := by
@@ -238,14 +233,6 @@ theorem isDegLE_zero : ∀ k, (0 : CaloricPoly d).IsDegLE k
   | 1 => ⟨rfl, rfl⟩
   | _ + 2 => trivial
 
-/-- Degree `≤ 1` polynomials are caloric. -/
-theorem IsDegLE.src_eq_zero {P : CaloricPoly d} {k : ℕ} (hP : P.IsDegLE k) (hk : k ≤ 1) :
-    P.src = 0 := by
-  rcases k with _ | _ | k
-  · simp [src, hP.2.1, hP.2.2]
-  · simp [src, hP.1, hP.2]
-  · omega
-
 /-! ### The bilinear form of a matrix -/
 
 /-- The continuous bilinear form `(v, w) ↦ ∑ᵢⱼ Mᵢⱼ vᵢ wⱼ` of a matrix. -/
@@ -256,9 +243,6 @@ noncomputable def bilin (M : Matrix (Fin d) (Fin d) ℝ) : E d →L[ℝ] E d →
 theorem bilin_apply (M : Matrix (Fin d) (Fin d) ℝ) (v w : E d) :
     bilin M v w = ∑ i, ∑ j, M i j * v i * w j := by
   simp [bilin, sum_apply, mul_assoc]
-
-theorem bilin_add (M M' : Matrix (Fin d) (Fin d) ℝ) : bilin (M + M') = bilin M + bilin M' := by
-  simp [bilin, add_smul, Finset.sum_add_distrib]
 
 theorem bilin_sub (M M' : Matrix (Fin d) (Fin d) ℝ) : bilin (M - M') = bilin M - bilin M' := by
   simp [bilin, sub_smul, Finset.sum_sub_distrib]
@@ -281,27 +265,6 @@ theorem norm_bilin_le (M : Matrix (Fin d) (Fin d) ℝ) : ‖bilin M‖ ≤ ∑ i
 theorem bilin_single (M : Matrix (Fin d) (Fin d) ℝ) (i j : Fin d) :
     bilin M (EuclideanSpace.single i 1) (EuclideanSpace.single j 1) = M i j := by
   simp [bilin_apply, PiLp.single_apply]
-
-/-- Every continuous bilinear form on `E d` is `bilin` of its matrix on the standard basis. -/
-theorem eq_bilin (T : E d →L[ℝ] E d →L[ℝ] ℝ) :
-    T = bilin (Matrix.of fun i j ↦ T (EuclideanSpace.single i 1) (EuclideanSpace.single j 1)) := by
-  ext v w
-  rw [bilin_apply]
-  conv_lhs => rw [← (EuclideanSpace.basisFun (Fin d) ℝ).sum_repr v,
-    ← (EuclideanSpace.basisFun (Fin d) ℝ).sum_repr w]
-  simp only [map_sum, map_smul, sum_apply, smul_apply,
-    smul_eq_mul, EuclideanSpace.basisFun_apply, EuclideanSpace.basisFun_repr, Matrix.of_apply,
-    Finset.mul_sum]
-  rw [Finset.sum_comm]
-  refine Finset.sum_congr rfl fun i _ ↦ Finset.sum_congr rfl fun j _ ↦ ?_
-  ring
-
-theorem bilin_injective : Function.Injective (bilin (d := d)) := by
-  intro M N h
-  ext i j
-  have := congrArg (fun T : E d →L[ℝ] E d →L[ℝ] ℝ ↦
-    T (EuclideanSpace.single i 1) (EuclideanSpace.single j 1)) h
-  simpa [bilin_single] using this
 
 theorem bilin_symm {M : Matrix (Fin d) (Fin d) ℝ} (hM : M.IsSymm) (v w : E d) :
     bilin M v w = bilin M w v := by
@@ -365,14 +328,6 @@ theorem recenter_eval (P : CaloricPoly d) (h z : E d × ℝ) :
 
 @[simp] theorem src_recenter (P : CaloricPoly d) (h : E d × ℝ) : (P.recenter h).src = P.src := rfl
 
-theorem IsDegLE.recenter {P : CaloricPoly d} {k : ℕ} (hP : P.IsDegLE k) (h : E d × ℝ) :
-    (P.recenter h).IsDegLE k := by
-  rcases k with _ | _ | k
-  · obtain ⟨h1, h2, h3⟩ := hP
-    exact ⟨by simp [h1, h3], h2, h3⟩
-  · exact hP
-  · exact trivial
-
 theorem rescale_eval (P : CaloricPoly d) (r lam : ℝ) (q : E d × ℝ) :
     (P.rescale r lam).eval q = P.eval (r • q.1, r ^ 2 * q.2) / lam := by
   simp only [eval_eq_bilin, rescale_a, rescale_b, rescale_c, rescale_M, bilin_smul,
@@ -393,25 +348,6 @@ theorem IsDegLE.rescale {P : CaloricPoly d} {k : ℕ} (hP : P.IsDegLE k) (r lam 
   · obtain ⟨h2, h3⟩ := hP
     exact ⟨by simp [h2], by simp [h3]⟩
   · exact trivial
-
-theorem coeffNorm_rescale_le (P : CaloricPoly d) {r lam : ℝ} (hr : 0 ≤ r) (hlam : 0 < lam) :
-    (P.rescale r lam).coeffNorm ≤ max 1 (max r (r ^ 2)) * P.coeffNorm / lam := by
-  set m := max 1 (max r (r ^ 2))
-  have hm1 : 1 ≤ m := le_max_left _ _
-  have hmr : r ≤ m := (le_max_left r (r ^ 2)).trans (le_max_right _ _)
-  have hmr2 : r ^ 2 ≤ m := (le_max_right r (r ^ 2)).trans (le_max_right _ _)
-  have hS : 0 ≤ ∑ i, ∑ j, |P.M i j| := by positivity
-  have heq : (P.rescale r lam).coeffNorm =
-      (|P.a| + r * ‖P.b‖ + r ^ 2 * |P.c| + r ^ 2 * ∑ i, ∑ j, |P.M i j|) / lam := by
-    simp only [coeffNorm, rescale_a, rescale_b, rescale_c, rescale_M, Matrix.smul_apply,
-      smul_eq_mul, abs_div, abs_mul, norm_smul, Real.norm_eq_abs, abs_of_pos hlam,
-      abs_of_nonneg hr, abs_of_nonneg (sq_nonneg r), ← Finset.mul_sum]
-    ring
-  rw [heq, coeffNorm]
-  gcongr
-  nlinarith [mul_le_mul_of_nonneg_right hm1 (abs_nonneg P.a),
-    mul_le_mul_of_nonneg_right hmr (norm_nonneg P.b),
-    mul_le_mul_of_nonneg_right hmr2 (abs_nonneg P.c), mul_le_mul_of_nonneg_right hmr2 hS]
 
 /-! ### Calculus -/
 
@@ -456,17 +392,6 @@ theorem hasFDerivAt_eval_slice (P : CaloricPoly d) (s : ℝ) (y : E d) :
   rw [abs_mul, show (1 : ℝ) + 1 = (2 : ℕ) by norm_num, Real.rpow_natCast, abs_of_pos one_half_pos]
   calc 1 / 2 * |bilin P.M h h| ≤ 1 / 2 * (‖bilin P.M‖ * ‖h‖ * ‖h‖) := by gcongr
     _ = 1 / 2 * ‖bilin P.M‖ * ‖h‖ ^ 2 := by ring
-
-theorem hasGradientAt_eval_slice (P : CaloricPoly d) (q : E d × ℝ) :
-    HasGradientAt (fun y ↦ P.eval (y, q.2)) (P.b + Matrix.toEuclideanLin P.M q.1) q.1 := by
-  rw [hasGradientAt_iff_hasFDerivAt]
-  convert P.hasFDerivAt_eval_slice q.2 q.1 using 1
-  ext v
-  simp [inner_toEuclideanLin P.symm]
-
-theorem gradₓ_eval (P : CaloricPoly d) (q : E d × ℝ) :
-    gradₓ P.eval q = P.b + Matrix.toEuclideanLin P.M q.1 :=
-  (P.hasGradientAt_eval_slice q).gradient
 
 theorem iteratedFDeriv_two_slice_eval (P : CaloricPoly d) (s : ℝ) (x v w : E d) :
     iteratedFDeriv ℝ 2 (fun y ↦ P.eval (y, s)) x ![v, w] = bilin P.M v w := by

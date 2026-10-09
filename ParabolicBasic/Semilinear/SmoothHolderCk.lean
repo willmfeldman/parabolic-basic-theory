@@ -89,13 +89,6 @@ namespace HolderCk
 
 variable {α : ℝ} {Ω : Set (E d × ℝ)}
 
-theorem zero_iff {φ : E d × ℝ → ℝ} :
-    HolderCk α 0 φ Ω ↔ ContinuousOn φ Ω ∧ LocHolderOnPar α φ Ω := Iff.rfl
-
-theorem succ_iff {m : ℕ} {φ : E d × ℝ → ℝ} :
-    HolderCk α (m + 1) φ Ω ↔ HolderCk α 0 φ Ω ∧ DifferentiableOn ℝ φ Ω ∧
-      ∀ j : Fin (d + 1), HolderCk α m (partialDeriv j φ) Ω := Iff.rfl
-
 /-- Level `0` is implied by every level. -/
 theorem zero {m : ℕ} {φ : E d × ℝ → ℝ} (h : HolderCk α m φ Ω) : HolderCk α 0 φ Ω := by
   cases m with
@@ -104,10 +97,6 @@ theorem zero {m : ℕ} {φ : E d × ℝ → ℝ} (h : HolderCk α m φ Ω) : Hol
 
 theorem continuousOn {m : ℕ} {φ : E d × ℝ → ℝ} (h : HolderCk α m φ Ω) : ContinuousOn φ Ω :=
   h.zero.1
-
-theorem locHolderOnPar {m : ℕ} {φ : E d × ℝ → ℝ} (h : HolderCk α m φ Ω) :
-    LocHolderOnPar α φ Ω :=
-  h.zero.2
 
 /-- `𝓗^{m+1} ⊆ 𝓗^m`. -/
 theorem mono_order {m : ℕ} {φ : E d × ℝ → ℝ} (h : HolderCk α (m + 1) φ Ω) :

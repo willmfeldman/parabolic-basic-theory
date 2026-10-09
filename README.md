@@ -7,7 +7,7 @@ comparison for viscosity solutions, parabolic Perron existence with barriers,
 interior `C^∞` regularity of viscosity caloric functions through Bernstein
 estimates, the heat Dirichlet problem on ball cylinders, interior Schauder
 estimates, and existence, uniqueness and regularity for the semilinear
-Cauchy–Dirichlet problem on bounded `C²` domains. The approximately 14,700
+Cauchy–Dirichlet problem on bounded `C²` domains. The approximately 14,400
 lines of Lean source are `sorry`-free and introduce no axioms: every theorem
 depends only on `propext`, `Classical.choice` and `Quot.sound`.
 

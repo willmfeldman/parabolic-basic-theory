@@ -23,8 +23,7 @@ With `A = diag(1, …, 1, 0)` (`heatDiag`) and `β = e_last` (`timeVec`):
 * `heatTraceOp d := traceSecondOrderOperator A β 0 0`, i.e. `-tr(A X) + q_last`;
 * `parabolicOp F := heatTraceOp d + zeroOrderOperator ((z, r) ↦ F (e⁻¹ z) r)`, the operator
   `dₜ − lapₓ + F` on `Point (d + 1)`;
-* `heatOp S := traceSecondOrderOperator A β 0 (S ∘ e⁻¹)`, the operator `dₜ − lapₓ − S`
-  (`heatOp_eq_parabolicOp`).
+* `heatOp S := traceSecondOrderOperator A β 0 (S ∘ e⁻¹)`, the operator `dₜ − lapₓ − S`.
 
 Explicitly `parabolicOp F z r q X = -(∑ i : Fin d, X i.castSucc i.castSucc) + q (Fin.last d)
 + F (e⁻¹ z) r` (`parabolicOp_apply`). The file records the `ViscositySolns` operator hypotheses
@@ -116,11 +115,6 @@ theorem heatOp_apply (S : E d × ℝ → ℝ) (z : ViscositySolns.Point (d + 1))
     heatOp S z r q X = -(∑ i : Fin d, X i.castSucc i.castSucc) + q (Fin.last d)
       - S ((spaceTimeEquiv d).symm z) := by
   simp [heatOp, trace_heatDiag_mul]
-
-theorem heatOp_eq_parabolicOp (S : E d × ℝ → ℝ) : heatOp S = parabolicOp (fun p _ ↦ -S p) := by
-  funext z r q X
-  simp only [heatOp_apply, parabolicOp_apply]
-  ring
 
 /-- `d = 0`: `parabolicOp F z r q X = q 0 + F (e⁻¹ z) r`. -/
 example (F : E 0 × ℝ → ℝ → ℝ) (z : ViscositySolns.Point 1) (r : ℝ) (q : ViscositySolns.Point 1)
@@ -230,33 +224,6 @@ theorem parabolicOp_uniformScalarDecreaseOn {F : E d × ℝ → ℝ → ℝ} {Ω
   linarith [hF _ hz r]
 
 /-! ### Operator conditions for `heatOp` -/
-
-theorem heatOp_proper (S : E d × ℝ → ℝ) : ViscositySolns.Proper (heatOp S) := by
-  rw [heatOp_eq_parabolicOp]
-  exact parabolicOp_proper fun _ ↦ monotone_const
-
-theorem heatOp_operatorContinuous {S : E d × ℝ → ℝ} (hS : Continuous S) :
-    ViscositySolns.OperatorContinuous (heatOp S) := by
-  rw [heatOp_eq_parabolicOp]
-  exact parabolicOp_operatorContinuous (hS.comp continuous_fst).neg
-
-theorem heatOp_hessianSymmetricInvariant (S : E d × ℝ → ℝ) :
-    ViscositySolns.HessianSymmetricInvariant (heatOp S) := by
-  rw [heatOp_eq_parabolicOp]
-  exact parabolicOp_hessianSymmetricInvariant _
-
-theorem heatOp_continuous_hessian (S : E d × ℝ → ℝ) (z : ViscositySolns.Point (d + 1))
-    (r : ℝ) (q : ViscositySolns.Point (d + 1)) :
-    Continuous fun X : ViscositySolns.Hessian (d + 1) ↦ heatOp S z r q X := by
-  rw [heatOp_eq_parabolicOp]
-  exact parabolicOp_continuous_hessian _ z r q
-
-theorem heatOp_ishiiCondition {S : E d × ℝ → ℝ} {Ω : Set (E d × ℝ)} {R : Set ℝ}
-    {ω : ℝ → ℝ} (hω : ViscositySolns.ComparisonModulus ω) (hmono : Monotone ω)
-    (hS : ∀ p ∈ Ω, ∀ q ∈ Ω, S p - S q ≤ ω (dist p q)) :
-    ViscositySolns.IshiiOperatorComparisonConditionOn (toPointSet Ω) R (heatOp S) := by
-  rw [heatOp_eq_parabolicOp]
-  exact parabolicOp_ishiiCondition hω hmono fun p hp q hq r _ ↦ by linarith [hS p hp q hq]
 
 /-! ### Helpers: modulus from compactness, Tietze -/
 

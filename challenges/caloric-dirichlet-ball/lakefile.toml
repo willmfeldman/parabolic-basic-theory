@@ -1,5 +1,5 @@
 name = "caloric-dirichlet-ball"
-version = "0.3.0"
+version = "0.3.1"
 # Keep `lake build` safe for the comparator workflow: it elaborates only the trusted statement surface.
 defaultTargets = ["Vocabulary", "Challenge"]
 # Share the root workspace's dependency checkouts and builds; the manifests lock identical revisions.

@@ -166,14 +166,6 @@ theorem caloric_dirichlet_cCyl (x₀ : E d) (t₀ : ℝ) {r : ℝ} (hr : 0 < r) 
 
 /-! ### `d = 0` regression -/
 
-/-- For `d = 0` the ball is the whole (one-point) space, so the parabolic boundary is only the
-initial face. -/
-theorem parBdry_ball_eq_of_zero (x₀ : E 0) {ρ : ℝ} (hρ : 0 < ρ) (a b : ℝ) :
-    parBdry (ball x₀ ρ) a b = univ ×ˢ {a} := by
-  have hball : ball x₀ ρ = univ :=
-    eq_univ_of_forall fun y ↦ by simpa [Subsingleton.elim y x₀] using hρ
-  simp [parBdry, hball]
-
 /-- `d = 0` regression: the assembly needs no `1 ≤ d`. -/
 example (x₀ : E 0) {g : E 0 × ℝ → ℝ} (hg : ContinuousOn g (parBdry (ball x₀ 1) 0 1)) :
     ∃ h : E 0 × ℝ → ℝ, ContinuousOn h (closedBall x₀ 1 ×ˢ Icc 0 1) ∧

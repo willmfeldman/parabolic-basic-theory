@@ -15,8 +15,8 @@ public import Mathlib.Analysis.Calculus.DerivativeTest
   minimum of a function `C²` at the point, the second derivative in every direction and the
   Laplacian are nonnegative (reduced to the global statement by a smooth bump);
 * `deriv_nonpos_of_isLocalMinOn_Iic`: the one-sided first-derivative test;
-* `lapₓ_le_of_touchesAbove`, `gradₓ_eq_of_touchesAbove`: slice form in space;
-* `dₜ_le_of_isLocalMinOn_Iic`, `dₜ_eq_of_isLocalMin`: slice form in time.
+* `lapₓ_le_of_touchesAbove`: slice form in space;
+* `dₜ_le_of_isLocalMinOn_Iic`: slice form in time.
 -/
 
 @[expose] public section
@@ -100,15 +100,6 @@ theorem laplacian_nonneg_of_isLocalMin' [FiniteDimensional ℝ F] {f : F → ℝ
   rw [laplacian_eq_iteratedFDeriv_stdOrthonormalBasis]
   exact Finset.sum_nonneg fun i _ ↦ iteratedFDeriv_two_nonneg_of_isLocalMin' hf hmin _
 
-/-- At a local maximum of a function `C²` at the point, the Laplacian is nonpositive. -/
-theorem laplacian_nonpos_of_isLocalMax' [FiniteDimensional ℝ F] {f : F → ℝ} {x : F}
-    (hf : ContDiffAt ℝ 2 f x) (hmax : IsLocalMax f x) : Δ f x ≤ 0 := by
-  have h := laplacian_nonneg_of_isLocalMin' hf.neg hmax.neg
-  have := congrFun (laplacian_neg (f := f)) x
-  simp only [Pi.neg_apply] at this
-  rw [show (fun y ↦ -f y) = -f from rfl, this] at h
-  linarith
-
 end SecondOrder
 
 /-! ### The one-sided first-derivative test -/
@@ -157,19 +148,6 @@ theorem lapₓ_le_of_touchesAbove (hψ : ContDiffAt ℝ 2 (fun y ↦ ψ (y, p.2)
   rw [hsub] at h
   linarith
 
-/-- If `u ≤ ψ` on the spatial slice near `p.1` with equality at `p`, and both slices are
-differentiable at `p.1`, then `∇ₓu(p) = ∇ₓψ(p)`. -/
-theorem gradₓ_eq_of_touchesAbove (hψ : DifferentiableAt ℝ (fun y ↦ ψ (y, p.2)) p.1)
-    (hu : DifferentiableAt ℝ (fun y ↦ u (y, p.2)) p.1) (heq : u p = ψ p)
-    (hle : ∀ᶠ y in 𝓝 p.1, u (y, p.2) ≤ ψ (y, p.2)) : gradₓ u p = gradₓ ψ p := by
-  have hmin : IsLocalMin (fun y ↦ ψ (y, p.2) - u (y, p.2)) p.1 := by
-    filter_upwards [hle] with y hy
-    simp only [Prod.mk.eta, heq, sub_self]
-    linarith
-  have h0 := hmin.fderiv_eq_zero
-  rw [fderiv_fun_sub hψ hu, sub_eq_zero] at h0
-  simp only [gradₓ, gradient, h0]
-
 /-- **One-sided time test.** If the time slices of `ψ` and `u` are differentiable at
 `p.2` and `ψ - u` has a local minimum at `p.2` among earlier times, then `∂ₜψ(p) ≤ ∂ₜu(p)`. -/
 theorem dₜ_le_of_isLocalMinOn_Iic (hψ : DifferentiableAt ℝ (fun s ↦ ψ (p.1, s)) p.2)
@@ -180,15 +158,6 @@ theorem dₜ_le_of_isLocalMinOn_Iic (hψ : DifferentiableAt ℝ (fun s ↦ ψ (p
   rw [deriv_fun_sub hψ hu] at h
   simp only [dₜ]
   linarith
-
-/-- **Two-sided time test.** If the time slices of `ψ` and `u` are differentiable at
-`p.2` and `ψ - u` has a local minimum at `p.2`, then `∂ₜψ(p) = ∂ₜu(p)`. -/
-theorem dₜ_eq_of_isLocalMin (hψ : DifferentiableAt ℝ (fun s ↦ ψ (p.1, s)) p.2)
-    (hu : DifferentiableAt ℝ (fun s ↦ u (p.1, s)) p.2)
-    (hmin : IsLocalMin (fun s ↦ ψ (p.1, s) - u (p.1, s)) p.2) : dₜ ψ p = dₜ u p := by
-  have h := hmin.deriv_eq_zero
-  rw [deriv_fun_sub hψ hu, sub_eq_zero] at h
-  exact h
 
 /-- If `s ↦ φ (p.1, s)` has a minimum at `p.2` among earlier times, then `∂ₜφ(p) ≤ 0`
 (with the slice differentiable at `p.2`). -/

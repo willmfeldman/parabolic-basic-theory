@@ -148,21 +148,6 @@ theorem coeff_bound_rpow {P : CaloricPoly d} {r K γ : ℝ} (hr : 0 < r)
     fun i j ↦ (hM i j).trans_eq ?_⟩
   all_goals first | (rw [e1]; ring) | (rw [e2]; ring)
 
-/-- The coefficient norm under the hypothesis of `coeff_bound`. -/
-theorem coeffNorm_le_of_bound {P : CaloricPoly d} {r ε : ℝ} (hr : 0 < r)
-    (h : ∀ q ∈ cCyl 0 0 r, |P.eval q| ≤ ε) :
-    P.coeffNorm ≤ ε * (1 + 2 * Real.sqrt d / r + (4 + 48 * d ^ 2) / r ^ 2) := by
-  obtain ⟨ha, -, hb, hc, -, hM⟩ := coeff_bound hr h
-  have hS : ∑ i, ∑ j, |P.M i j| ≤ d ^ 2 * (48 * ε / r ^ 2) := by
-    calc ∑ i, ∑ j, |P.M i j| ≤ ∑ _i : Fin d, ∑ _j : Fin d, 48 * ε / r ^ 2 :=
-          Finset.sum_le_sum fun i _ ↦ Finset.sum_le_sum fun j _ ↦ hM i j
-      _ = _ := by simp; ring
-  have heq : ε * (1 + 2 * Real.sqrt d / r + (4 + 48 * d ^ 2) / r ^ 2) =
-      ε + 2 * Real.sqrt d * ε / r + 4 * ε / r ^ 2 + d ^ 2 * (48 * ε / r ^ 2) := by
-    field_simp; ring
-  rw [heq, coeffNorm]
-  linarith
-
 /-- `d = 0`: `coeff_bound` still applies (all spatial sums are empty). -/
 example {P : CaloricPoly 0} {r ε : ℝ} (hr : 0 < r) (h : ∀ q ∈ cCyl 0 0 r, |P.eval q| ≤ ε) :
     |P.a| ≤ ε ∧ |P.c| ≤ 4 * ε / r ^ 2 :=

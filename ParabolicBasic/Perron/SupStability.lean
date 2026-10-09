@@ -225,17 +225,6 @@ theorem g_le_perronLower (H : PerronHyp V a b f g) {z : E d × ℝ} (hz : z ∈ 
   have := H.le_perronLower hL hsub hLg (H.parBdry_subset hz)
   linarith
 
-/-- `W^*` belongs to the Perron class. -/
-theorem perronUpper_mem_perronClass (H : PerronHyp V a b f g) :
-    perronUpper V a b f g ∈ perronClass V a b f g :=
-  ⟨H.upperSemicontinuousOn_perronUpper, H.isViscSubOn_perronUpper,
-    fun _ hq ↦ H.perronUpper_le_g hq⟩
-
-/-- `W = W^*` in the open cylinder. -/
-theorem perronUpper_eq_perronSup (H : PerronHyp V a b f g) {q : E d × ℝ}
-    (hq : q ∈ V ×ˢ Ioo a b) : perronUpper V a b f g q = perronSup V a b f g q :=
-  le_antisymm (H.le_perronSup H.perronUpper_mem_perronClass hq) (H.perronSup_le_perronUpper hq)
-
 theorem perronLower_le_perronUpper (H : PerronHyp V a b f g) {q : E d × ℝ}
     (hq : q ∈ V ×ˢ Ioo a b) : perronLower V a b f g q ≤ perronUpper V a b f g q :=
   (H.perronLower_le_perronSup hq).trans (H.perronSup_le_perronUpper hq)

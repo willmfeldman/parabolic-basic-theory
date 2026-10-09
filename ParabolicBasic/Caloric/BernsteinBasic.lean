@@ -182,14 +182,6 @@ theorem iterPartial_sub (hO : IsOpen O) (hf : ContDiffOn ℝ ∞ f O) (hg : Cont
   have he : (fun y ↦ f y - g y) = fun y ↦ 1 * f y + -1 * g y := by funext y; ring
   rw [he, h]; ring
 
-theorem iterPartial_add (hO : IsOpen O) (hf : ContDiffOn ℝ ∞ f O) (hg : ContDiffOn ℝ ∞ g O)
-    (w : List (Fin (d + 1))) :
-    ∀ z ∈ O, iterPartial w (fun y ↦ f y + g y) z = iterPartial w f z + iterPartial w g z := by
-  intro z hz
-  have h := iterPartial_linear_comb hO hf hg 1 1 w z hz
-  have he : (fun y ↦ f y + g y) = fun y ↦ 1 * f y + 1 * g y := by funext y; ring
-  rw [he, h]; ring
-
 theorem iterPartial_const_mul (hO : IsOpen O) (hf : ContDiffOn ℝ ∞ f O) (a : ℝ)
     (w : List (Fin (d + 1))) :
     ∀ z ∈ O, iterPartial w (fun y ↦ a * f y) z = a * iterPartial w f z := by
@@ -213,29 +205,12 @@ theorem iterPartial_finset_sum {ι : Type*} (hO : IsOpen O) (S : Finset ι)
     rw [partialDeriv_congr_nhds hev,
       partialDeriv_sum S fun k hk ↦ differentiableAt_iterPartial hO (hF k hk) w hz]
 
-/-- `iterPartial` depends only on the values on an open set. -/
-theorem iterPartial_congr_of_eqOn (hO : IsOpen O) (h : EqOn f g O) (w : List (Fin (d + 1))) :
-    EqOn (iterPartial w f) (iterPartial w g) O := by
-  induction w with
-  | nil => exact h
-  | cons j w ih =>
-    intro z hz
-    exact partialDeriv_congr_nhds (Filter.eventually_of_mem (hO.mem_nhds hz) ih) j
-
 /-- **The slice dictionary, packaged.** On an open set where `f` is `C²`,
 `heatP f = dₜ f - lapₓ f`. -/
 theorem heatP_eq_dₜ_sub_lapₓ (hO : IsOpen O) (hf : ContDiffOn ℝ 2 f O) (hz : z ∈ O) :
     heatP f z = dₜ f z - lapₓ f z := by
   rw [heatP, dₜ_eq_partialDeriv_last ((hf.differentiableOn (by norm_num) z hz).differentiableAt
     (hO.mem_nhds hz)), lapₓ_eq_sum_partialDeriv hO hf hz]
-
-theorem heatP_sub (hO : IsOpen O) (hf : ContDiffOn ℝ ∞ f O) (hg : ContDiffOn ℝ ∞ g O)
-    (hz : z ∈ O) : heatP (fun y ↦ f y - g y) z = heatP f z - heatP g z := by
-  have h1 := iterPartial_sub hO hf hg [Fin.last d] z hz
-  have h2 := fun i : Fin d ↦ iterPartial_sub hO hf hg [i.castSucc, i.castSucc] z hz
-  simp only [iterPartial_cons, iterPartial_nil] at h1 h2
-  simp only [heatP, h1, h2, Finset.sum_sub_distrib]
-  ring
 
 theorem heatP_linear_comb (hO : IsOpen O) (hf : ContDiffOn ℝ ∞ f O) (hg : ContDiffOn ℝ ∞ g O)
     (a b : ℝ) (hz : z ∈ O) :
@@ -254,11 +229,6 @@ theorem heatP_finset_sum {ι : Type*} (hO : IsOpen O) {S : Finset ι} {F : ι �
   simp only [iterPartial_cons, iterPartial_nil] at h1 h2
   simp only [heatP, h1, h2, Finset.sum_sub_distrib]
   rw [Finset.sum_comm]
-
-theorem heatP_const (c : ℝ) (z : E d × ℝ) : heatP (fun _ ↦ c) z = 0 := by
-  have h : ∀ j, partialDeriv j (fun _ : E d × ℝ ↦ c) = fun _ ↦ 0 := fun j ↦
-    funext fun y ↦ partialDeriv_const c j y
-  simp [heatP, h, partialDeriv_const]
 
 /-- Product rule for the first partials, near a point of an open set. -/
 theorem partialDeriv_mul_eventuallyEq (hO : IsOpen O) (hf : ContDiffOn ℝ ∞ f O)

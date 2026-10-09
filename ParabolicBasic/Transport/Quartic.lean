@@ -38,10 +38,6 @@ theorem spaceTimeQuartic_self (p₀ : E d × ℝ) : spaceTimeQuartic p₀ p₀ =
 theorem spaceTimeQuartic_nonneg (p₀ q : E d × ℝ) : 0 ≤ spaceTimeQuartic p₀ q := by
   unfold spaceTimeQuartic; positivity
 
-/-- `p₀` is a global minimum (value `0`). -/
-theorem isMinOn_spaceTimeQuartic (p₀ : E d × ℝ) : IsMinOn (spaceTimeQuartic p₀) univ p₀ :=
-  fun q _ ↦ by simpa [spaceTimeQuartic_self] using spaceTimeQuartic_nonneg p₀ q
-
 /-- `C^∞` (`∞`, not `ω`). -/
 theorem contDiff_spaceTimeQuartic (p₀ : E d × ℝ) : ContDiff ℝ ∞ (spaceTimeQuartic p₀) := by
   unfold spaceTimeQuartic

@@ -78,17 +78,7 @@ theorem mem_cCyl_iff {x : E d} {t r : ℝ} {q : E d × ℝ} : q ∈ cCyl x t r �
   · have : ¬ ‖q.1 - x‖ < r := fun h ↦ hr ((norm_nonneg _).trans_lt h)
     simp [this]
 
-theorem mem_cCylAt_iff {p q : E d × ℝ} {r : ℝ} : q ∈ cCylAt p r ↔ pdist q p < r :=
-  mem_cCyl_iff
-
-/-- `pdist` is translation invariant. -/
-theorem pdist_sub_right (p q z : E d × ℝ) : pdist (p - z) (q - z) = pdist p q := by
-  simp [pdist]
-
 theorem pdist_add_right (p q z : E d × ℝ) : pdist (p + z) (q + z) = pdist p q := by
-  simp [pdist]
-
-theorem pdist_sub_eq_pdist_zero (p q : E d × ℝ) : pdist (q - p) 0 = pdist q p := by
   simp [pdist]
 
 theorem norm_fst_sub_le_pdist (p q : E d × ℝ) : ‖p.1 - q.1‖ ≤ pdist p q :=
@@ -109,14 +99,6 @@ theorem norm_sub_le_max_pdist (p q : E d × ℝ) : ‖p - q‖ ≤ max (pdist p 
   rw [Prod.norm_def]
   exact max_le_max (norm_fst_sub_le_pdist p q) (by
     rw [Prod.snd_sub, Real.norm_eq_abs]; exact abs_snd_sub_le_pdist_sq p q)
-
-/-- Conversely, `pdist p q ≤ max (dist p q) (√(dist p q))`. -/
-theorem pdist_le_max_dist (p q : E d × ℝ) : pdist p q ≤ max (dist p q) (Real.sqrt (dist p q)) := by
-  have h1 : ‖p.1 - q.1‖ ≤ dist p q := by
-    rw [← dist_eq_norm, Prod.dist_eq]; exact le_max_left _ _
-  have h2 : |p.2 - q.2| ≤ dist p q := by
-    rw [← Real.dist_eq, Prod.dist_eq]; exact le_max_right _ _
-  exact max_le_max h1 (Real.sqrt_le_sqrt h2)
 
 /-- Pairs at sup-distance `≥ η` (`η ≤ 1`) are at parabolic distance `≥ η`. -/
 theorem le_pdist_of_le_dist {p q : E d × ℝ} {η : ℝ} (hη : η ≤ 1) (h : η ≤ dist p q) :
@@ -182,9 +164,6 @@ theorem pdist_eq_zero {p q : E d × ℝ} : pdist p q = 0 ↔ p = q := by
       le_antisymm ((abs_snd_sub_le_pdist_sq p q).trans (by rw [h]; norm_num)) (abs_nonneg _)
     exact Prod.ext (sub_eq_zero.1 (norm_eq_zero.1 h1)) (sub_eq_zero.1 (abs_eq_zero.1 h2))
   · rintro rfl; exact pdist_self p
-
-theorem pdist_pos {p q : E d × ℝ} (h : p ≠ q) : 0 < pdist p q :=
-  (pdist_nonneg p q).lt_of_ne' (mt pdist_eq_zero.1 h)
 
 /-! ### Local Hölder classes -/
 

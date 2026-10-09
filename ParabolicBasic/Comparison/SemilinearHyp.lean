@@ -17,7 +17,6 @@ public import Mathlib.Analysis.SpecialFunctions.Pow.Continuity
   and Lipschitz in `z` uniformly in `x ∈ S` extends to a function on all of `E d × ℝ` with the
   same bounds, jointly continuous. The extension is
   `f̃ x z := ⨅ y : S, (f y z + K * dist x y ^ α)` (McShane in `x`, uniformly in `z`);
-* `SemilinearHyp.exists_extension`: the same, followed by a truncation, for the full bundle.
 
 The extension is needed because the `Proper` and `OperatorContinuous` conditions of
 `ViscositySolns` are global in the space variable, while `f` is controlled only on `closure V`.
@@ -150,28 +149,5 @@ theorem SemilinearHyp.continuousOn {f : E d → ℝ → ℝ} {S : Set (E d)} (hf
     ContinuousOn (fun q : E d × ℝ ↦ f q.1 q.2) (S ×ˢ univ) := by
   obtain ⟨g, hgf, -, -, hgc⟩ := exists_holderLip_extension hf.holder_x hf.lip_z
   exact hgc.continuousOn.congr fun q hq ↦ (hgf q.1 hq.1 q.2).symm
-
-/-- Global extension (Hölder–McShane in `x`, then truncation). -/
-theorem SemilinearHyp.exists_extension {f : E d → ℝ → ℝ} {S : Set (E d)}
-    (hf : SemilinearHyp f S) :
-    ∃ g : E d → ℝ → ℝ, (∀ x ∈ S, ∀ z, g x z = f x z) ∧ SemilinearHyp g univ ∧
-      Continuous (fun q : E d × ℝ ↦ g q.1 q.2) := by
-  obtain ⟨g, hgf, ⟨K, α, hα, hα1, hK⟩, ⟨L, -, hL⟩, hgc⟩ :=
-    exists_holderLip_extension hf.holder_x hf.lip_z
-  obtain ⟨M₀, hM₀⟩ := hf.bounded
-  set M := max M₀ 0 with hMdef
-  have hM0 : 0 ≤ M := le_max_right _ _
-  set c : ℝ → ℝ := fun s ↦ max (min s M) (-M) with hcdef
-  have hc : ∀ s t, |c s - c t| ≤ |s - t| := fun s t ↦
-    (abs_max_sub_max_le_abs _ _ _).trans
-      ((abs_min_sub_min_le_max _ _ _ _).trans (by simp))
-  refine ⟨fun x z ↦ c (g x z), fun x hx z ↦ ?_,
-    ⟨⟨K, α, hα, hα1, fun x _ y _ z ↦ (hc _ _).trans (hK x y z)⟩,
-      ⟨L, fun x _ z w ↦ (hc _ _).trans (hL x z w)⟩,
-      ⟨M, fun x _ z ↦ abs_le.2 ⟨le_max_right _ _, max_le (min_le_right _ _) (by linarith)⟩⟩⟩,
-    (hgc.min continuous_const).max continuous_const⟩
-  have h := abs_le.1 ((hM₀ x hx z).trans (le_max_left M₀ 0))
-  simp only [hcdef, hgf x hx z]
-  rw [min_eq_left h.2, max_eq_left h.1]
 
 end ParabolicBasic

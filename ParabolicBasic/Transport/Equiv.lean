@@ -139,10 +139,6 @@ abbrev toPointSet (Ω : Set (E d × ℝ)) : Set (ViscositySolns.Point (d + 1)) :
 noncomputable abbrev toPointFun (u : E d × ℝ → ℝ) : ViscositySolns.Point (d + 1) → ℝ :=
   u ∘ (spaceTimeEquiv d).symm
 
-theorem mem_toPointSet {Ω : Set (E d × ℝ)} {z : ViscositySolns.Point (d + 1)} :
-    z ∈ toPointSet Ω ↔ (spaceTimeEquiv d).symm z ∈ Ω :=
-  Iff.rfl
-
 @[simp]
 theorem spaceTimeEquiv_mem_toPointSet {Ω : Set (E d × ℝ)} {p : E d × ℝ} :
     spaceTimeEquiv d p ∈ toPointSet Ω ↔ p ∈ Ω := by
@@ -158,9 +154,6 @@ theorem toPointFun_spaceTimeEquiv (u : E d × ℝ → ℝ) (p : E d × ℝ) :
     toPointFun u (spaceTimeEquiv d p) = u p := by
   simp only [toPointFun, Function.comp_apply, ContinuousLinearEquiv.symm_apply_apply]
 
-theorem toPointSet_eq_image (Ω : Set (E d × ℝ)) : toPointSet Ω = spaceTimeEquiv d '' Ω :=
-  ((spaceTimeEquiv d).toEquiv.image_eq_preimage_symm Ω).symm
-
 /-! ### Topology -/
 
 theorem isOpen_toPointSet_iff {Ω : Set (E d × ℝ)} : IsOpen (toPointSet Ω) ↔ IsOpen Ω :=
@@ -169,19 +162,12 @@ theorem isOpen_toPointSet_iff {Ω : Set (E d × ℝ)} : IsOpen (toPointSet Ω) �
 theorem isOpen_toPointSet {Ω : Set (E d × ℝ)} (hΩ : IsOpen Ω) : IsOpen (toPointSet Ω) :=
   isOpen_toPointSet_iff.2 hΩ
 
-theorem isClosed_toPointSet_iff {Ω : Set (E d × ℝ)} : IsClosed (toPointSet Ω) ↔ IsClosed Ω :=
-  (spaceTimeEquiv d).symm.toHomeomorph.isClosed_preimage
-
 theorem closure_toPointSet (Ω : Set (E d × ℝ)) : closure (toPointSet Ω) = toPointSet (closure Ω) :=
   ((spaceTimeEquiv d).symm.toHomeomorph.preimage_closure Ω).symm
 
 theorem frontier_toPointSet (Ω : Set (E d × ℝ)) :
     frontier (toPointSet Ω) = toPointSet (frontier Ω) :=
   ((spaceTimeEquiv d).symm.toHomeomorph.preimage_frontier Ω).symm
-
-theorem interior_toPointSet (Ω : Set (E d × ℝ)) :
-    interior (toPointSet Ω) = toPointSet (interior Ω) :=
-  ((spaceTimeEquiv d).symm.toHomeomorph.preimage_interior Ω).symm
 
 theorem isCompact_toPointSet_iff {K : Set (E d × ℝ)} : IsCompact (toPointSet K) ↔ IsCompact K :=
   (spaceTimeEquiv d).symm.toHomeomorph.isCompact_preimage
@@ -215,16 +201,6 @@ theorem upperSemicontinuousOn_toPointFun_iff {u : E d × ℝ → ℝ} {S : Set (
 
 theorem lowerSemicontinuousOn_toPointFun_iff {u : E d × ℝ → ℝ} {S : Set (E d × ℝ)} :
     LowerSemicontinuousOn (toPointFun u) (toPointSet S) ↔ LowerSemicontinuousOn u S := by
-  constructor
-  · intro h
-    have := h.comp (spaceTimeEquiv d).continuous.continuousOn
-      (fun p hp ↦ by simpa using hp : MapsTo (spaceTimeEquiv d) S (toPointSet S))
-    simpa [Function.comp_def] using this
-  · intro h
-    exact h.comp (spaceTimeEquiv d).symm.continuous.continuousOn (fun _ hz ↦ hz)
-
-theorem continuousOn_toPointFun_iff {u : E d × ℝ → ℝ} {S : Set (E d × ℝ)} :
-    ContinuousOn (toPointFun u) (toPointSet S) ↔ ContinuousOn u S := by
   constructor
   · intro h
     have := h.comp (spaceTimeEquiv d).continuous.continuousOn

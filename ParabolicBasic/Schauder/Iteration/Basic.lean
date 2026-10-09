@@ -19,7 +19,7 @@ public import ParabolicBasic.Comparison.Parabolic
   caloric polynomial, then `w y = (u (S y) - P (S y - p)) / λ` with `S = parAffine p.1 p.2 r`
   solves with source `r² (H (S y) - src P) / λ` on `S ⁻¹' Ω`. This is the only normalization
   lemma the iteration uses.
-* `frontier_cCyl_subset`, `closure_cCylAt_subset_closedBall`, `exists_compact_margin`: the
+* `closure_cCylAt_subset_closedBall`, `exists_compact_margin`: the
   geometry of centred cylinders.
 
 All statements hold for every `d`, including `d = 0`.
@@ -48,13 +48,6 @@ namespace CaloricPoly
 theorem src_neg (P : CaloricPoly d) : (-P).src = -P.src := by
   simp only [src, neg_c, neg_M, Matrix.trace_neg]
   ring
-
-/-- `P (S_{p,r} y - p) = P_{r,1} (y)`. -/
-theorem eval_parAffine_sub (P : CaloricPoly d) (p : E d × ℝ) (r : ℝ) (y : E d × ℝ) :
-    P.eval (parAffine p.1 p.2 r y - p) = (P.rescale r 1).eval y := by
-  rw [rescale_eval, div_one]
-  congr 1
-  ext <;> simp [parAffine]
 
 end CaloricPoly
 
@@ -105,16 +98,6 @@ theorem isOpen_cCyl (x : E d) (t r : ℝ) : IsOpen (cCyl x t r) :=
 theorem center_mem_cCyl (x : E d) (t : ℝ) {r : ℝ} (hr : 0 < r) : (x, t) ∈ cCyl x t r := by
   have : 0 < r ^ 2 := by positivity
   exact ⟨mem_ball_self hr, by simp only [mem_Ioo]; constructor <;> linarith⟩
-
-/-- The frontier of a centred cylinder below its top face lies on the parabolic boundary. (The
-closure is `closure_cCyl`.) -/
-theorem frontier_cCyl_subset (x : E d) (t r : ℝ) :
-    frontier (cCyl x t r) ∩ {q | q.2 < t + r ^ 2} ⊆
-      parBdry (ball x r) (t - r ^ 2) (t + r ^ 2) := by
-  rintro q ⟨hq, hqt⟩
-  rcases frontier_prod_Ioo_subset (ball x r) (t - r ^ 2) (t + r ^ 2) hq with h | ⟨-, h⟩
-  · exact h
-  · exact absurd (mem_singleton_iff.1 h ▸ hqt : t + r ^ 2 < t + r ^ 2) (lt_irrefl _)
 
 /-- For `0 < r ≤ 1` the closed centred cylinder lies in the closed ball of the sup metric. -/
 theorem closure_cCylAt_subset_closedBall (p : E d × ℝ) {r : ℝ} (hr : 0 < r) (hr1 : r ≤ 1) :

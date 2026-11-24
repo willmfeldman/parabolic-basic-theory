@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 # Validate the public theorem inventory against Lean and the challenge configs, and the
-# toolchain, dependency, and Comparator tool pins against the files that use them.
+# toolchain and dependency pins against the files that use them, and the comparator engine
+# (the toolchain's `lake comparator`, no pinned tool revisions).
 require 'yaml'
 require 'json'
 require 'open3'
@@ -31,15 +32,19 @@ lean_names = []
 # Targets without a `challenge` key (e.g. packaged assembly theorems whose hypotheses are
 # discharged inside other challenges) are checked for name and axioms only.
 challenged = (targets + challenges).select { |entry| entry.key?('challenge') }
-manifest_configs = challenged.map { |entry| File.join(entry.fetch('challenge'), 'config.json') }.sort
+manifest_configs = challenged.map { |entry| File.join(entry.fetch('challenge'), 'config.json') }.uniq.sort
 workspace_configs = Dir.glob('challenges/*/config.json').sort
 failures << "challenge config inventory differs from manifest: #{(workspace_configs - manifest_configs).inspect} unlisted, #{(manifest_configs - workspace_configs).inspect} missing" unless workspace_configs == manifest_configs
-challenged.each do |entry|
-  path = entry.fetch('challenge')
+# Several targets may share one workspace (STANDARD v1.12: one workspace per repo). Its
+# `theorem_names` are then the targets' `challenge_theorems`, concatenated in manifest order.
+challenged.group_by { |entry| entry.fetch('challenge') }.each do |path, entries|
   config_path = File.join(path, 'config.json')
   abort "missing #{config_path}" unless File.file?(config_path)
   config = JSON.parse(File.read(config_path))
-  expected = entry.fetch('challenge_theorems')
+  lists = entries.map { |entry| entry.fetch('challenge_theorems') }
+  abort "#{path}: challenge_theorems must be nonempty lists" unless lists.all? { |l| l.is_a?(Array) && !l.empty? }
+  expected = lists.flatten
+  failures << "#{path}: duplicate challenge theorem" unless expected.uniq.length == expected.length
   %w[Vocabulary.lean Challenge.lean Solution.lean lakefile.toml].each do |file|
     failures << "#{path}: missing #{file}" unless File.file?(File.join(path, file))
   end
@@ -98,17 +103,15 @@ workspace_configs.each do |config_path|
     unless File.file?(workspace_manifest) && git_packages.call(workspace_manifest) == locked
 end
 
-# Comparator tool revisions agree with scripts/release-comparator.sh.
+# The comparator ships with the toolchain, so the toolchain pin is the tool pin.
 tools = manifest.fetch('comparator')
-driver = File.read('scripts/release-comparator.sh')
-{ 'comparator_revision' => 'COMPARATOR_REV',
-  'lean4export_revision' => 'LEAN4EXPORT_REV',
-  'landrun_revision' => 'LANDRUN_REV' }.each do |key, var|
-  pinned = driver[/^#{var}=(\h+)$/, 1]
-  failures << "comparator.#{key} #{tools[key].inspect} differs from #{var} in scripts/release-comparator.sh" \
-    unless pinned && tools[key] == pinned
+failures << "comparator engine #{tools['engine'].inspect} is not \"lake comparator\"" \
+  unless tools['engine'] == 'lake comparator'
+%w[comparator_revision lean4export_revision landrun_revision].each do |key|
+  failures << "#{key} is obsolete (the engine is lake comparator); remove it" if tools.key?(key)
 end
-
+failures << 'scripts/release-comparator.sh is not the lake comparator driver' \
+  unless File.read('scripts/release-comparator.sh').include?('lake comparator')
 
 abort failures.join("\n") unless failures.empty?
 if metadata_only

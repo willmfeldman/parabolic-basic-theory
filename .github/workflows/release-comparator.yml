@@ -1,33 +1,36 @@
 name: Release comparator
 
-# Release gate: run Comparator on every challenges/*/config.json and upload an attestation.
+# Release gate: run the toolchain's `lake comparator` on every challenges/*/config.json and upload an
+# attestation (no external tool pins: the comparator ships with the toolchain).
 # Dispatch it on the exact release commit; tag and publish a GitHub release only after it passes,
 # with the attestation artifact attached. See challenges/README.md.
 on:
   workflow_dispatch:
-  # Release candidates: release branches and version tags.
+  # Release-candidate branches. Version tags don't trigger it: the tag goes on a commit whose dispatched
+  # run already passed, so a tag-push run would only repeat it.
   push:
     branches: ['release/**']
-    tags: ['v*']
 
 jobs:
   comparator:
+    # Automatic runs happen only in a public repository; a private copy runs this only when dispatched.
+    if: github.event_name == 'workflow_dispatch' || github.event.repository.visibility == 'public'
     runs-on: ubuntu-latest
-    timeout-minutes: 180   # PARAM: raise for large repos (IV uses 300)
+    timeout-minutes: 180   # PARAM: raise for large repos (up to 300)
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
-      # Mathlib, the library, and Comparator's own Lean toolchain do not fit in a hosted
+      # Mathlib, the library, and the sandbox's copy of the repo do not fit in a hosted
       # runner's default free space. Remove preinstalled SDKs this job never uses.
       - name: Free runner disk space
         run: |
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
           df -h /
       # Build the trusted library once, outside the sandbox. The challenge workspaces share its
-      # dependency folder (`packagesDir`), which Comparator's sandbox can read but not write.
+      # dependency folder (`packagesDir`), which the comparator sandbox can read but not write.
       # `--no-cache`: tracked dependencies are built from source, never taken from prebuilt
       # release archives. The Mathlib cache is fetched separately and is not affected.
       - uses: leanprover/lean-action@v1
@@ -40,12 +43,10 @@ jobs:
         run: |
           rm -rf "$HOME/.cache/mathlib"
           df -h /
-      - uses: actions/setup-go@v7
-        with:
-          go-version: '1.24.0'
       - name: Validate challenge inventory and configuration
         run: ruby scripts/check-formalization-manifest.rb --metadata-only
-      - name: Install pinned Comparator tools
+      # bubblewrap, and unprivileged user namespaces (Ubuntu 24.04+ restricts them through AppArmor).
+      - name: Prepare the comparator sandbox
         run: bash scripts/release-comparator.sh install
       # Lake writes `.hash` files the first time it replays some downloaded Mathlib artifacts,
       # which the sandbox cannot do. Building the trusted Challenge targets (and the Mathlib-only
@@ -55,9 +56,14 @@ jobs:
         run: |
           for workspace in challenges/*/; do
             echo "==> ${workspace}Challenge"
-            (cd "$workspace" && lake build Vocabulary Challenge)   # PARAM: `Vocabulary Challenge` (v1.4 Vocabulary modules)
+            # A workspace without its own lakefile is built by the root lakefile.
+            dir="$workspace"; [ -e "$workspace/lakefile.toml" ] || [ -e "$workspace/lakefile.lean" ] || dir=.
+            (cd "$dir" && lake build Vocabulary Challenge)   # PARAM: `Vocabulary Challenge` (v1.4 Vocabulary modules)
           done
-      - name: Run Comparator on every challenge
+      # The checkout sits under /home, which the sandbox hides, so the script judges a copy in /srv.
+      - name: Run lake comparator on every challenge
+        env:
+          COMPARATOR_PARANOID: "1"   # PARAM: "0" (Lean's kernel only) only with a recorded reason, e.g. timeout
         run: bash scripts/release-comparator.sh run
       - name: Upload Comparator attestation
         if: always()

@@ -1,0 +1,107 @@
+name: Release on green
+
+# Tag and publish a GitHub release for the dispatched commit, only if its release gate already passed.
+# Dispatch it on `main` once CI, Release comparator (and Challenge preflight, if required) are green on
+# the main tip. It does not wait: if any gate run is missing, running or failed, it stops without tagging.
+#
+# What it does on green:
+#   1. checks that the commit is the main tip, that `version` in the lakefile equals the input,
+#      and that the tag does not exist yet;
+#   2. creates the annotated tag vX.Y.Z on the commit, as the commit's own author;
+#   3. creates the release with the notes and the comparator attestation of the gate run;
+#   4. dispatches release-build-archive.yml with the tag. A release created with the workflow
+#      token does not start `release: published` workflows, so the archive build is started here.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version X.Y.Z (must equal the lakefile version)'
+        required: true
+      summary:
+        description: 'One-line summary (tag message "Release X.Y.Z: <summary>", release title)'
+        required: true
+      notes:
+        description: 'Release notes (Markdown)'
+        required: true
+      preflight:
+        description: 'Also require a passing Challenge preflight run'
+        type: boolean
+        default: false
+
+permissions: {}
+
+jobs:
+  release:
+    # Releases are made only in a public repository, never in a private copy.
+    if: github.event.repository.visibility == 'public'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write   # tag and release
+      actions: write    # read gate runs, download the attestation, dispatch the archive build
+    env:
+      GH_TOKEN: ${{ github.token }}
+      VERSION: ${{ inputs.version }}
+      TAG: v${{ inputs.version }}
+      SUMMARY: ${{ inputs.summary }}
+      NOTES: ${{ inputs.notes }}
+      PREFLIGHT: ${{ inputs.preflight }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Check the commit, version and tag
+        run: |
+          set -euo pipefail
+          sha=$(git rev-parse HEAD)
+          [ "$GITHUB_REF" = refs/heads/main ] || { echo "Dispatch on main (got $GITHUB_REF)." >&2; exit 1; }
+          [ "$sha" = "$(git rev-parse origin/main)" ] || { echo "$sha is not the main tip." >&2; exit 1; }
+          [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Version must be X.Y.Z." >&2; exit 1; }
+          # Only the lakefiles that exist: sed exits 2 on a missing file, which pipefail would turn into a failure.
+          have=$(for f in lakefile.toml lakefile.lean; do
+                   [ ! -f "$f" ] || sed -nE 's/^[[:space:]]*version[[:space:]]*:?=[[:space:]]*(v!)?"([^"]+)".*/\2/p' "$f"
+                 done | head -1)
+          [ "$have" = "$VERSION" ] || { echo "Lakefile version is '$have', not $VERSION." >&2; exit 1; }
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null; then
+            echo "Tag $TAG already exists." >&2; exit 1
+          fi
+          echo "SHA=$sha" >> "$GITHUB_ENV"
+      - name: Check the release gate
+        run: |
+          set -euo pipefail
+          workflows=("CI" "Release comparator")
+          if [ "$PREFLIGHT" = true ]; then workflows+=("Challenge preflight"); fi
+          for wf in "${workflows[@]}"; do
+            # The newest run on this commit counts, so a re-run of a transient failure supersedes it.
+            out=$(gh run list -R "$GITHUB_REPOSITORY" --workflow "$wf" --commit "$SHA" --limit 1 \
+                    --json databaseId,status,conclusion -q '.[0] | "\(.status) \(.conclusion) \(.databaseId)"')
+            echo "$wf: ${out:-no run}"
+            case $out in
+              "completed success "*)
+                if [ "$wf" = "Release comparator" ]; then echo "COMPARATOR_RUN=${out##* }" >> "$GITHUB_ENV"; fi ;;
+              *) echo "Gate not green ($wf). Not tagging." >&2; exit 1 ;;
+            esac
+          done
+      - name: Collect the comparator attestation
+        run: |
+          set -euo pipefail
+          gh run download "$COMPARATOR_RUN" -R "$GITHUB_REPOSITORY" -n "comparator-attestation-$SHA" -D attestation
+          (cd attestation && zip -qr "$RUNNER_TEMP/comparator-attestation-$TAG.zip" .)
+      - name: Tag
+        run: |
+          set -euo pipefail
+          # The tagger is the commit's author: the repository's public identity.
+          git config user.name "$(git log -1 --format=%an "$SHA")"
+          git config user.email "$(git log -1 --format=%ae "$SHA")"
+          git tag -a "$TAG" -m "Release $VERSION: $SUMMARY" "$SHA"
+          git push origin "refs/tags/$TAG"
+      - name: Release
+        run: |
+          set -euo pipefail
+          printf '%s\n' "$NOTES" > "$RUNNER_TEMP/notes.md"
+          gh release create "$TAG" -R "$GITHUB_REPOSITORY" --verify-tag --title "$TAG — $SUMMARY" \
+            --notes-file "$RUNNER_TEMP/notes.md" "$RUNNER_TEMP/comparator-attestation-$TAG.zip"
+      - name: Start the archive build
+        run: |
+          gh workflow run release-build-archive.yml -R "$GITHUB_REPOSITORY" --ref "$TAG" -f tag="$TAG"
+          echo "Released $TAG on $SHA; release-build-archive.yml dispatched for $TAG."

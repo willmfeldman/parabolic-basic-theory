@@ -4,22 +4,21 @@ description: >
   semilinear heat equations on R^d x R: comparison for viscosity solutions,
   parabolic Perron existence, regularity of viscosity caloric functions,
   interior Schauder estimates, and the semilinear Cauchy-Dirichlet problem.
-lean_toolchain: leanprover/lean4:v4.35.0-rc3
-mathlib: v4.35.0-rc3
+lean_toolchain: leanprover/lean4:v4.36.0
+mathlib: v4.36.0
 dependencies:
   - name: viscosity_solns
     url: https://github.com/willmfeldman/viscosity-solution-theory
-    rev: v0.4.0
-    commit: b9dc82d59e19c5689b6669b41e0c59168c1cdc84
+    rev: v0.5.0
+    commit: e34fe7ee502d572c7d2933209c46212e4652af89
   - name: AleksandrovDifferentiability
     url: https://github.com/willmfeldman/aleksandrov-differentiability
-    rev: v0.4.0
-    commit: 5e5c2ec4cee4f8851387e9bb309eeb703cd72a25
-# Comparator tool revisions pinned in scripts/release-comparator.sh.
+    rev: v0.5.0
+    commit: 058378f1033dfd842b52b611497996fc92b28a2f
+# Challenges are judged by the pinned toolchain's `lake comparator --paranoid`
+# (scripts/release-comparator.sh); the toolchain pin is the tool pin.
 comparator:
-  comparator_revision: fd5d5bcf14177b187f66d4502071268d877887c3
-  lean4export_revision: 66f1fb4bc256072069767fce52d39480e4524869
-  landrun_revision: 811cfff51ceaf3d9843708aa6d22e9b84ccac8b4
+  engine: "lake comparator"
 permitted_axioms: [propext, Quot.sound, Classical.choice]
 automation:
   methods:
@@ -43,7 +42,7 @@ targets:
       of B_rho(x0) x (a, b], there is h continuous on the closed cylinder,
       C^infinity and caloric in the open cylinder, with h = g on the parabolic
       boundary.
-    challenge: challenges/caloric-dirichlet-ball
+    challenge: challenges/main-results
     challenge_theorems: [ParabolicBasic.challenge_caloric_dirichlet_ball]
   - id: semilinear-comparison
     kind: headline-theorem
@@ -60,7 +59,7 @@ targets:
       viscosity subsolution u and supersolution v of u_t = Lap u - f(x, u) in
       V x (a, b] with u <= v on the parabolic boundary satisfy u <= v on the
       closed cylinder. Uniqueness for the Cauchy-Dirichlet problem follows.
-    challenge: challenges/semilinear-comparison
+    challenge: challenges/main-results
     challenge_theorems:
       - ParabolicBasic.challenge_semilinear_comparison
       - ParabolicBasic.challenge_semilinear_unique
@@ -79,7 +78,7 @@ targets:
       A classical C^{2,1} solution of u_t = Lap u - f(x, u) in U x I, with U
       open and I containing a left neighbourhood of each of its points, is a
       viscosity sub- and supersolution (past-touching test functions).
-    challenge: challenges/classical-viscosity
+    challenge: challenges/main-results
     challenge_theorems:
       - ParabolicBasic.challenge_classical_viscSub
       - ParabolicBasic.challenge_classical_viscSuper
@@ -99,7 +98,7 @@ targets:
       z and bounded, and g Lipschitz, the problem u_t = Lap u - f(x, u) in
       U x (0, infinity), u = g on the parabolic boundary, has a solution in
       C(closure U x [0, infinity)) and C^{2,1}(U x (0, infinity)).
-    challenge: challenges/semilinear-existence
+    challenge: challenges/main-results
     challenge_theorems: [ParabolicBasic.challenge_semilinear_exists]
   - id: semilinear-regularity
     kind: headline-theorem
@@ -114,7 +113,7 @@ targets:
       A classical solution is C^infinity in U x I when f is C^infinity. For a
       solution of the Cauchy-Dirichlet problem with continuous f and C^2 data,
       the spatial gradient is continuous on U x [0, infinity).
-    challenge: challenges/semilinear-regularity
+    challenge: challenges/main-results
     challenge_theorems:
       - ParabolicBasic.challenge_semilinear_smooth
       - ParabolicBasic.challenge_semilinear_gradient_continuous
@@ -130,7 +129,7 @@ targets:
     informal: >
       A continuous viscosity solution of the heat equation on an open set of
       space-time is C^infinity there and satisfies u_t = Lap u classically.
-    challenge: challenges/caloric-smooth
+    challenge: challenges/main-results
     challenge_theorems: [ParabolicBasic.challenge_caloric_smooth]
   - id: schauder-interior
     kind: headline-theorem
@@ -146,7 +145,7 @@ targets:
       locally parabolic-Hoelder of exponent alpha in (0, 1), is C^{2,1} with
       u_t, the spatial gradient and the spatial Hessian locally
       parabolic-Hoelder of exponent alpha.
-    challenge: challenges/schauder-interior
+    challenge: challenges/main-results
     challenge_theorems: [ParabolicBasic.challenge_schauder_interior]
   - id: perron-cylinder
     kind: assembly-theorem

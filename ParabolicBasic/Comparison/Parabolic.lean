@@ -12,6 +12,7 @@ public import ParabolicBasic.Comparison.SemilinearHyp
 public import ParabolicBasic.Comparison.ExpChange
 public import ParabolicBasic.Comparison.Frontier
 public import ParabolicBasic.Viscosity.Invariance
+import Mathlib.Analysis.Calculus.Deriv.Inv
 
 /-!
 # Comparison for USC/LSC viscosity sub/supersolutions

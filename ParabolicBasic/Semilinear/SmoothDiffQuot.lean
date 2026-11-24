@@ -216,7 +216,8 @@ theorem isHeatSolOn_partialDeriv {Ω : Set (E d × ℝ)} (hΩ : IsOpen Ω) {φ �
       exact this
     have hFc : ContinuousOn (fun q : (E d × ℝ) × ℝ ↦ -partialDeriv j ψ q.1)
         (ball p ε ×ˢ univ) :=
-      ((hψj.mono hOΩ).comp continuousOn_fst fun q hq ↦ hq.1).neg
+      ((hψj.mono hOΩ).comp continuousOn_fst
+        fun q (hq : q ∈ ball p ε ×ˢ (univ : Set ℝ)) ↦ hq.1).neg
     have hc : ContinuousOn (partialDeriv j φ) (ball p ε) := hφj.mono hOΩ
     refine ⟨IsViscSubOn.of_tendstoLocallyUniformlyOn isOpen_ball
       (Fn := fun n q _ ↦ -((ε / (n + 2))⁻¹ * (ψ (q + (ε / (n + 2)) • e) - ψ q)))

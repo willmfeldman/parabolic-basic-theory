@@ -9,6 +9,7 @@ public import ParabolicBasic.Defs.Viscosity
 public import ParabolicBasic.Defs.Parabolic
 public import ParabolicBasic.Calculus.Slice
 public import ParabolicBasic.Viscosity.Basic
+import Mathlib.Analysis.Calculus.Deriv.Inv
 
 /-!
 # Penalized maximum principle with a source

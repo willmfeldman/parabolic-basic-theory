@@ -40,7 +40,7 @@ variable {d : ℕ}
 /-! ### The parabolic distance -/
 
 /-- The centred parabolic cylinder around the point `p`: `cCyl p.1 p.2 r`. -/
-abbrev cCylAt (p : E d × ℝ) (r : ℝ) : Set (E d × ℝ) := cCyl p.1 p.2 r
+noncomputable abbrev cCylAt (p : E d × ℝ) (r : ℝ) : Set (E d × ℝ) := cCyl p.1 p.2 r
 
 theorem pdist_comm (p q : E d × ℝ) : pdist p q = pdist q p := by
   simp only [pdist, norm_sub_rev, abs_sub_comm]

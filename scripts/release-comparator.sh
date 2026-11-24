@@ -1,55 +1,64 @@
 #!/usr/bin/env bash
-# Release gate: install the pinned Comparator tools and run Comparator on every
-# challenges/*/config.json, writing an attestation report to comparator-report/.
-# Used by .github/workflows/release-comparator.yml on a fresh GitHub-hosted Linux runner.
+# Release gate: run the toolchain's own `lake comparator` on every
+# challenges/*/config.json and write an attestation report to comparator-report/.
+# Used by .github/workflows/release-comparator.yml on a fresh GitHub-hosted Linux runner; also runs in a
+# cloud worker session (as root) or on any Linux machine with sudo.
 #
 # Usage: scripts/release-comparator.sh install|run
+#   install  make sure bubblewrap is present and unprivileged user namespaces are allowed
+#   run      judge every challenge; exit 0 only if all pass
+# Environment:
+#   COMPARATOR_PARANOID=1|0   also run every external checker bundled with the toolchain (default 1)
+#   COMPARATOR_WORKDIR=DIR    where to copy the repo when it sits under a home directory
+#                             (default /srv/comparator-work)
+#
+# No external tool revisions: comparator, the exporter and the extra kernels ship with the toolchain in
+# lean-toolchain, so the toolchain pin is the tool pin.
 set -euo pipefail
 
-# Immutable upstream source revisions. lean4export is built with this repository's exact
-# lean-toolchain, since its olean reader must match the challenge toolchain. These revisions are
-# also recorded in formalization.yaml (checked by scripts/check-formalization-manifest.rb).
-COMPARATOR_REV=fd5d5bcf14177b187f66d4502071268d877887c3
-LANDRUN_REV=811cfff51ceaf3d9843708aa6d22e9b84ccac8b4
-LEAN4EXPORT_REV=66f1fb4bc256072069767fce52d39480e4524869
 ROOT=$(git rev-parse --show-toplevel)
-TOOLS="${RUNNER_TEMP:-/tmp}/comparator-tools"
 REPORT="$ROOT/comparator-report"
-mkdir -p "$REPORT/logs"
-
-clone_pinned() {
-  local url=$1 rev=$2 path=$3
-  git clone --filter=blob:none "$url" "$path"
-  git -C "$path" checkout --detach "$rev"
-  test "$(git -C "$path" rev-parse HEAD)" = "$rev"
-}
+PARANOID="${COMPARATOR_PARANOID:-1}"
+SUDO=""; [ "$(id -u)" = 0 ] || SUDO=sudo
 
 install() {
-  mkdir -p "$TOOLS/bin"
-  clone_pinned https://github.com/leanprover/comparator.git "$COMPARATOR_REV" "$TOOLS/comparator"
-  clone_pinned https://github.com/leanprover/lean4export.git "$LEAN4EXPORT_REV" "$TOOLS/lean4export"
-  clone_pinned https://github.com/zouuup/landrun.git "$LANDRUN_REV" "$TOOLS/landrun"
-  cp "$ROOT/lean-toolchain" "$TOOLS/lean4export/lean-toolchain"
-  (cd "$TOOLS/lean4export" && lake build lean4export)
-  (cd "$TOOLS/comparator" && lake build comparator)
-  (cd "$TOOLS/landrun" && go build -o "$TOOLS/bin/landrun" ./cmd/landrun)
-  cp "$TOOLS/lean4export/.lake/build/bin/lean4export" "$TOOLS/bin/lean4export"
-  cp "$TOOLS/comparator/.lake/build/bin/comparator" "$TOOLS/bin/comparator"
-  "$TOOLS/bin/landrun" --version > "$REPORT/logs/landrun-version.txt" 2>&1 || true
+  mkdir -p "$REPORT/logs"
+  if ! command -v bwrap >/dev/null; then
+    $SUDO apt-get update -qq
+    $SUDO apt-get install -y -qq bubblewrap
+  fi
+  # Ubuntu 24.04+ (hosted runners) restricts unprivileged user namespaces through AppArmor; bwrap needs them.
+  local knob=/proc/sys/kernel/apparmor_restrict_unprivileged_userns
+  if [ -e "$knob" ] && [ "$(cat "$knob")" != 0 ]; then
+    $SUDO sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+  fi
+  bwrap --ro-bind / / --unshare-all true   # fails here, not mid-run, if the sandbox cannot start
+  { bwrap --version; lake --version; } > "$REPORT/logs/tool-versions.txt" 2>&1
 }
 
 run() {
-  export COMPARATOR_LANDRUN="$TOOLS/bin/landrun"
-  export COMPARATOR_LEAN4EXPORT="$TOOLS/bin/lean4export"
-  export PATH="$TOOLS/bin:$PATH"
-  python3 - "$ROOT" "$REPORT" "$TOOLS" "$COMPARATOR_REV" "$LANDRUN_REV" "$LEAN4EXPORT_REV" <<'PY'
+  mkdir -p "$REPORT/logs"
+  # bwrap hides the home directories inside the sandbox, and challenge workspaces reach the root through
+  # relative paths (`path = "../.."`, `packagesDir`). A repo under a home directory is judged from a copy.
+  local work="$ROOT"
+  case "$ROOT/" in
+    /home/*|/root/*)
+      work="${COMPARATOR_WORKDIR:-/srv/comparator-work}/$(basename "$ROOT")"
+      $SUDO mkdir -p "$(dirname "$work")"
+      $SUDO rm -rf "$work"
+      $SUDO chown "$(id -u):$(id -g)" "$(dirname "$work")"
+      echo "Copying $ROOT to $work (outside the home directories, for the sandbox)"
+      cp -a "$ROOT" "$work"
+      ;;
+  esac
+  python3 - "$ROOT" "$work" "$REPORT" "$PARANOID" <<'PY'
 import json, pathlib, subprocess, sys
-root, report, tools = map(pathlib.Path, sys.argv[1:4])
-comparator, landrun, lean4export = sys.argv[4:]
-def out(*args): return subprocess.check_output(args, cwd=root, text=True).strip()
+root, work, report = map(pathlib.Path, sys.argv[1:4])
+paranoid = sys.argv[4] == '1'
+def out(*args, cwd=root): return subprocess.check_output(args, cwd=cwd, text=True).strip()
 # The workflow validates this inventory against formalization.yaml
-# (scripts/check-formalization-manifest.rb --metadata-only) before installing any tools.
-configs = sorted(root.glob('challenges/*/config.json'))
+# (scripts/check-formalization-manifest.rb --metadata-only) before this runs.
+configs = sorted(work.glob('challenges/*/config.json'))
 if not configs:
     raise SystemExit('No challenge configurations found')
 manifest = json.loads((root / 'lake-manifest.json').read_text())
@@ -59,14 +68,17 @@ data = {
     'lean_toolchain': (root / 'lean-toolchain').read_text().strip(),
     'lean_version': out('lean', '--version'),
     'mathlib_revision': next(p['rev'] for p in manifest['packages'] if p['name'] == 'mathlib'),
-    'tools': {'comparator': comparator, 'landrun': landrun, 'lean4export': lean4export},
+    'tools': {'engine': 'lake comparator', 'lake_version': out('lake', '--version'),
+              'bwrap_version': out('bwrap', '--version'), 'paranoid': paranoid},
     'sandbox_note': (
-        'Comparator is invoked with landrun on a standard GitHub-hosted Linux runner. Upstream '
-        'documents a landrun sandbox caveat requiring systemd-run containment for a full '
-        'adversarial guarantee; this workflow does not claim that stronger guarantee. Before '
-        'Comparator runs, the workflow downloads the Mathlib cache and builds the trusted library '
-        'and the trusted Challenge targets outside the sandbox; the challenge workspaces share '
-        'that dependency folder read-only.'),
+        "Each challenge is judged by the toolchain's `lake comparator`. It evaluates the challenge "
+        "workspace's configuration and builds and exports its code inside a bwrap sandbox: `/` read-only, "
+        "home directories hidden, only `.lake` writable, and no network except for dependency resolution. "
+        "Lake never loads the project's .olean files into its own process. "
+        + ("Besides Lean's kernel, every external checker bundled with the toolchain (--paranoid) must "
+           "accept the solution. " if paranoid else "Lean's default kernel is the only checker. ")
+        + "Before the sandboxed run, the workflow downloads the Mathlib cache and builds the trusted library "
+        "and the trusted Challenge targets outside the sandbox."),
     'results': [],
 }
 def write(): (report / 'attestation.json').write_text(json.dumps(data, indent=2) + '\n')
@@ -75,20 +87,25 @@ failed = False
 for config in configs:
     cfg = json.loads(config.read_text())
     if sorted(cfg['permitted_axioms']) != ['Classical.choice', 'Quot.sound', 'propext']:
-        raise SystemExit(f'Unexpected axiom allowance in {config}')
+        raise SystemExit(f'Unexpected axiom allowance in {config.relative_to(work)}')
     name = config.parent.name
+    # A workspace without its own lakefile is built by the root lakefile (root-project workspace).
+    has_lakefile = any((config.parent / f).exists() for f in ('lakefile.toml', 'lakefile.lean'))
+    cmd = ['lake', 'comparator', f'--config={config}'] + (['--paranoid'] if paranoid else [])
     with (report / 'logs' / f'{name}.log').open('w') as log:
-        result = subprocess.run(['lake', 'env', str(tools / 'bin' / 'comparator'), str(config.resolve())],
-                                cwd=config.parent, stdout=log, stderr=subprocess.STDOUT)
+        log.write('$ ' + ' '.join(cmd) + '\n'); log.flush()
+        result = subprocess.run(cmd, cwd=config.parent if has_lakefile else work,
+                                stdout=log, stderr=subprocess.STDOUT)
     ok = result.returncode == 0
     data['results'].append({
-        'config': str(config.relative_to(root)), 'theorems': cfg['theorem_names'],
+        'config': str(config.relative_to(work)), 'theorems': cfg['theorem_names'],
         'permitted_axioms': cfg['permitted_axioms'],
         'axiom_check': 'passed' if ok else 'failed', 'exit_code': result.returncode,
-        'result': 'PASS' if ok else 'FAIL', 'log': f'logs/{name}.log'})
+        'result': 'PASS' if ok else ('FAIL' if result.returncode == 1 else 'ERROR'),
+        'log': f'logs/{name}.log'})
     write()
     failed |= not ok
-    print(f'{name}: {"PASS" if ok else "FAIL"}', flush=True)
+    print(f'{name}: {data["results"][-1]["result"]}', flush=True)
 data['overall_result'] = 'FAIL' if failed else 'PASS'
 write()
 sys.exit(1 if failed else 0)

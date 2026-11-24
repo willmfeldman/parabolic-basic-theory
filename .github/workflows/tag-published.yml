@@ -1,0 +1,77 @@
+name: Tag published
+
+# Mark the dev commit that was exported as public release vX.Y.Z with the annotated tag published/vX.Y.Z.
+# Dispatch it on `main` in the private dev repository after the public release is out. With `delete_branch` it also
+# deletes those merged work branches (cloud sessions cannot delete remote refs). Re-running it for a tag that
+# already marks the same commit is a no-op for the tag, so a later dispatch can still delete branches. GitHub dispatches only
+# workflows whose file is on the default branch, so it must be on `main` first. The tag goes on the `sha` input,
+# which must be on `main`.
+# The cloud release path uses it because a cloud session can push branches but not tags; from a local
+# machine, `git tag -a published/vX.Y.Z <sha> -m "Exported as public vX.Y.Z" && git push origin published/vX.Y.Z`
+# does the same.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Public version X.Y.Z'
+        required: true
+      sha:
+        description: 'Full SHA of the exported dev commit'
+        required: true
+      delete_branch:
+        description: 'Optional: merged work branches to delete afterwards, space-separated (each tip must be on main)'
+        required: false
+        default: ''
+
+permissions: {}
+
+jobs:
+  tag:
+    # Dev repositories only: the public repository has no published/* tags.
+    if: github.event.repository.visibility == 'private'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    env:
+      VERSION: ${{ inputs.version }}
+      SHA: ${{ inputs.sha }}
+      DELETE_BRANCH: ${{ inputs.delete_branch }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Check and tag
+        run: |
+          set -euo pipefail
+          tag="published/v$VERSION"
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then echo "Version must be X.Y.Z." >&2; exit 1; fi
+          if ! [[ "$SHA" =~ ^[0-9a-f]{40}$ ]]; then echo "sha must be a full 40-character commit SHA." >&2; exit 1; fi
+          if ! git cat-file -e "$SHA^{commit}" 2>/dev/null; then echo "$SHA is not a commit here." >&2; exit 1; fi
+          if ! git merge-base --is-ancestor "$SHA" origin/main; then echo "$SHA is not on main." >&2; exit 1; fi
+          if existing=$(git ls-remote --exit-code --tags origin "refs/tags/$tag^{}" | cut -f1); then
+            if [ "$existing" = "$SHA" ]; then echo "Tag $tag already marks $SHA; nothing to tag."; exit 0; fi
+            echo "Tag $tag already exists on $existing, not $SHA." >&2; exit 1
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$tag" -m "Exported as public v$VERSION" "$SHA"
+          git push origin "refs/tags/$tag"
+          echo "Tagged $tag on $SHA."
+      # A cloud session cannot delete remote refs either, so the merged work branch can be removed here.
+      - name: Delete the merged work branches
+        if: inputs.delete_branch != ''
+        run: |
+          set -euo pipefail
+          git fetch -q origin main
+          # Check every branch first, so a bad name deletes nothing.
+          read -r -a branches <<< "$DELETE_BRANCH"
+          for b in "${branches[@]}"; do
+            case $b in main|master|published/*|refs/*|-*|*..*) echo "Refusing to delete '$b'." >&2; exit 1 ;; esac
+            tip=$(git ls-remote --exit-code --heads origin "refs/heads/$b" | cut -f1) || { echo "No branch '$b' on origin." >&2; exit 1; }
+            if ! git merge-base --is-ancestor "$tip" origin/main; then echo "'$b' ($tip) is not merged into main." >&2; exit 1; fi
+          done
+          for b in "${branches[@]}"; do
+            git push origin --delete "refs/heads/$b"
+            echo "Deleted merged branch $b."
+          done

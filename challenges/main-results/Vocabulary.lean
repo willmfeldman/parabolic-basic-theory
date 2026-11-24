@@ -8,9 +8,10 @@ module
 
 public import Vocabulary.Setting
 public import Vocabulary.Touching
-public import Vocabulary.Classical
 public import Vocabulary.Parabolic
+public import Vocabulary.Classical
 public import Vocabulary.Viscosity
+public import Vocabulary.Holder
 
 /-!
 # Vocabulary

@@ -132,7 +132,7 @@ example (x : E 0) (t : ℝ) : spaceTimeEquiv 0 (x, t) 0 = t := spaceTimeEquiv_ap
 /-! ### Sets and functions -/
 
 /-- A space-time set, transported to `Point (d + 1)`. -/
-abbrev toPointSet (Ω : Set (E d × ℝ)) : Set (ViscositySolns.Point (d + 1)) :=
+noncomputable abbrev toPointSet (Ω : Set (E d × ℝ)) : Set (ViscositySolns.Point (d + 1)) :=
   (spaceTimeEquiv d).symm ⁻¹' Ω
 
 /-- A space-time function, transported to `Point (d + 1)`. -/

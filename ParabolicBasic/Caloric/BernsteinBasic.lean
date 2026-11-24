@@ -47,7 +47,8 @@ def IsSmoothCaloricOn (O : Set (E d × ℝ)) (v : E d × ℝ → ℝ) : Prop :=
   ContDiffOn ℝ ∞ v O ∧ ∀ p ∈ O, dₜ v p = lapₓ v p
 
 /-- The closed backward parabolic cylinder `B̄_r(x) × [t - r², t]`. -/
-def closedParCyl (x : E d) (t r : ℝ) : Set (E d × ℝ) := closedBall x r ×ˢ Icc (t - r ^ 2) t
+noncomputable def closedParCyl (x : E d) (t r : ℝ) : Set (E d × ℝ) :=
+  closedBall x r ×ˢ Icc (t - r ^ 2) t
 
 /-- The parabolic order of a word of partials: space letters count `1`, the time letter
 `Fin.last d` counts `2`. -/

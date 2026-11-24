@@ -42,13 +42,7 @@ repo_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
 # Deliberately enumerate release workspaces instead of discovering arbitrary
 # directories: this driver is part of the reviewed release configuration.
 workspaces='
-caloric-dirichlet-ball
-caloric-smooth
-classical-viscosity
-schauder-interior
-semilinear-comparison
-semilinear-existence
-semilinear-regularity'
+main-results'
 
 # Fail closed if a new configured workspace has not been added to the reviewed
 # allowlist above.  This catches coverage drift without executing arbitrary

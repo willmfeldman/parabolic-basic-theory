@@ -31,11 +31,12 @@ def parBdry (V : Set (E d)) (a b : ℝ) : Set (E d × ℝ) :=
   (closure V ×ˢ {a}) ∪ (frontier V ×ˢ Icc a b)
 
 /-- The backward parabolic cylinder `Q_r(x, t) = B_r(x) × (t - r², t]`. -/
-def parCyl (x : E d) (t r : ℝ) : Set (E d × ℝ) := ball x r ×ˢ Ioc (t - r ^ 2) t
+noncomputable def parCyl (x : E d) (t r : ℝ) : Set (E d × ℝ) := ball x r ×ˢ Ioc (t - r ^ 2) t
 
 /-- The centred (open) parabolic cylinder `B_r(x) × (t - r², t + r²)`, used for the
 Schauder theory: `(x, t)` is an interior point, so no one-sided time expansion at a top face is
 needed. -/
-def cCyl (x : E d) (t r : ℝ) : Set (E d × ℝ) := ball x r ×ˢ Ioo (t - r ^ 2) (t + r ^ 2)
+noncomputable def cCyl (x : E d) (t r : ℝ) : Set (E d × ℝ) :=
+  ball x r ×ˢ Ioo (t - r ^ 2) (t + r ^ 2)
 
 end ParabolicBasic

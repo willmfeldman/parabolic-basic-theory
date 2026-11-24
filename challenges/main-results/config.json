@@ -1,0 +1,22 @@
+{
+  "challenge_module": "Challenge",
+  "solution_module": "Solution",
+  "theorem_names": [
+    "ParabolicBasic.challenge_caloric_dirichlet_ball",
+    "ParabolicBasic.challenge_semilinear_comparison",
+    "ParabolicBasic.challenge_semilinear_unique",
+    "ParabolicBasic.challenge_parBdry_ball_nonempty",
+    "ParabolicBasic.challenge_classical_viscSub",
+    "ParabolicBasic.challenge_classical_viscSuper",
+    "ParabolicBasic.challenge_time_not_viscSub",
+    "ParabolicBasic.challenge_time_viscSuper",
+    "ParabolicBasic.challenge_caloric_quadratic_solOn",
+    "ParabolicBasic.challenge_semilinear_exists",
+    "ParabolicBasic.challenge_semilinear_smooth",
+    "ParabolicBasic.challenge_semilinear_gradient_continuous",
+    "ParabolicBasic.challenge_caloric_smooth",
+    "ParabolicBasic.challenge_schauder_interior"
+  ],
+  "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
+  "enable_nanoda": false
+}

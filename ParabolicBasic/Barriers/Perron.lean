@@ -46,12 +46,12 @@ variable {V : Set (E d)} {a b : ℝ} {f : E d → ℝ → ℝ} {g : E d × ℝ �
 
 theorem IsSepBarrier.continuousOn_cyl (hw : IsSepBarrier V a b z φ τ) :
     ContinuousOn (fun q : E d × ℝ ↦ φ q.1 + τ q.2) (closure V ×ˢ Icc a b) :=
-  (hw.continuousOn.comp continuousOn_fst fun _ hq ↦ hq.1).add
+  (hw.continuousOn.comp continuousOn_fst fun _ (hq : _ ∈ closure V ×ˢ Icc a b) ↦ hq.1).add
     (hw.contDiff_time.continuous.comp continuous_snd).continuousOn
 
 theorem IsSepBarrier.contDiffOn_cyl (hw : IsSepBarrier V a b z φ τ) :
     ContDiffOn ℝ 2 (fun q : E d × ℝ ↦ φ q.1 + τ q.2) (V ×ˢ Ioo a b) :=
-  (hw.contDiffOn.comp contDiffOn_fst fun _ hq ↦ hq.1).add
+  (hw.contDiffOn.comp contDiffOn_fst fun _ (hq : _ ∈ V ×ˢ Ioo a b) ↦ hq.1).add
     (hw.contDiff_time.comp contDiff_snd).contDiffOn
 
 /-- The constant `K` of the barrier construction: `K ≥ M_f` and `|g q - g z| ≤ ε + K w q` on `Γ`. -/
